@@ -190,10 +190,14 @@
       ${people.map(p => `<button class="mi ${p.id === S.me ? 'on' : ''}" data-me="${p.id}">${av(p.id, 'xs')}${p.name}${p.role ? `<span class="faint" style="font-size:12px">· специалист</span>` : ''}${p.id === S.me ? ic('check', 'ml') : ''}</button>`).join('')}
       <hr><div class="eyebrow" style="padding:6px 9px">Тема</div>
       ${[['system', 'monitor', 'Как в системе'], ['light', 'sun', 'Светлая'], ['dark', 'moon', 'Тёмная']].map(([v, i, n]) => `<button class="mi ${theme === v ? 'on' : ''}" data-theme-set="${v}">${ic(i)}${n}</button>`).join('')}
+      <hr><div class="eyebrow" style="padding:6px 9px">Дизайн</div>
+      ${[[1, 'Тихий рабочий'], [2, 'Тёплая бумага'], [3, 'Пульт обзвона'], [4, 'Телефон в руке']].map(([v, n]) => `<button class="mi ${(window.DIZAIN || 1) === v ? 'on' : ''}" data-dz-set="${v}">${ic('palette')}${v}. ${n}${(window.DIZAIN || 1) === v ? ic('check', 'ml') : ''}</button>`).join('')}
+      <a class="mi" href="#vybor-dizaina">${ic('layout-grid')}Сравнить все четыре</a>
       <hr><button class="mi" id="reset-demo">${ic('rotate-ccw')}Сбросить демо-данные</button>`;
     $('#user-btn').parentElement.appendChild(m); icons();
     $$('[data-me]', m).forEach(b => b.onclick = () => { S.me = b.dataset.me; save(); m.remove(); shell(); render(); toast('Вы смотрите как ' + person(S.me).name, 'user'); });
     $$('[data-theme-set]', m).forEach(b => b.onclick = () => { setTheme(b.dataset.themeSet); m.remove(); });
+    $$('[data-dz-set]', m).forEach(b => b.onclick = () => App.setDizain(+b.dataset.dzSet));
     $('#reset-demo', m).onclick = () => { reset(); m.remove(); shell(); render(); toast('Демо-данные сброшены', 'rotate-ccw'); };
     setTimeout(() => document.addEventListener('click', function h(e) { if (!m.contains(e.target)) { m.remove(); document.removeEventListener('click', h); } }), 0);
   }

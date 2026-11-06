@@ -1,0 +1,157 @@
+/* Дизайн 4 «Телефон в руке»: мобильная первой. Один столбец, крупные карточки, нижняя панель,
+   исходы на всю ширину внизу под большой палец, свайп влево по карточке = следующая.
+   На компьютере: центральная колонка 560 px, в обзвоне список слева. */
+:root[data-dizain="4"] {
+  --bg: #f1f2fa; --surface: #ffffff; --surface-2: #eaecf8; --surface-3: #dde0f3; --border: #dcdff0; --border-strong: #c3c8e4;
+  --text: #15172b; --muted: #50557a; --faint: #5f648a;
+  --accent: #4f46e5; --accent-hover: #4338ca; --accent-soft: #e7e6fd; --accent-text: #3a33c1; --on-accent: #ffffff;
+  --dnc-bg: #fff2c2; --dnc-border: #d9b13a; --dnc-text: #5e4400; --dnc-strong: #a47a08;
+  --hot: #c62a1d; --hot-bg: #fde6e2; --hot-text: #98200f; --win: #1f7a3a; --win-bg: #def2e3;
+  --shadow-sm: 0 1px 2px rgba(30, 30, 80, .06); --shadow-md: 0 8px 26px rgba(40, 40, 110, .12); --shadow-lg: 0 24px 60px rgba(30, 30, 90, .28);
+  --font: "Onest", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --r-sm: 10px; --r-md: 14px; --r-lg: 22px; --top-h: 56px;
+  --st-7: #4f46e5;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-dizain="4"]:not([data-theme="light"]) {
+    --bg: #0e0f1d; --surface: #181a30; --surface-2: #20233f; --surface-3: #2b2f54; --border: #2a2d4d; --border-strong: #41457a;
+    --text: #eceeff; --muted: #b0b5da; --faint: #9399c4;
+    --accent: #8f89ff; --accent-hover: #a8a3ff; --accent-soft: #272561; --accent-text: #bab6ff; --on-accent: #0c0b33;
+    --dnc-bg: #2f2710; --dnc-border: #8a6d1c; --dnc-text: #f2d77a; --dnc-strong: #e7bd3c;
+    --hot: #f2665a; --hot-bg: #341714; --hot-text: #ff9a8f; --win: #6cc07a; --win-bg: #17291b;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4); --shadow-md: 0 8px 26px rgba(0,0,0,.5); --shadow-lg: 0 24px 60px rgba(0,0,0,.7); --overlay: rgba(0,0,10,.65);
+    --skeleton: #1d2040; --skeleton-hi: #292d54; --st-7: #8f89ff;
+    --st-1: #9399c4; --st-2: #7b9bb4; --st-3: #6e9bd0; --st-4: #8a90dc; --st-5: #a58ad8; --st-6: #5fb0bc; --st-8: #6cc07a;
+  }
+}
+:root[data-dizain="4"][data-theme="dark"] {
+  --bg: #0e0f1d; --surface: #181a30; --surface-2: #20233f; --surface-3: #2b2f54; --border: #2a2d4d; --border-strong: #41457a;
+  --text: #eceeff; --muted: #b0b5da; --faint: #9399c4;
+  --accent: #8f89ff; --accent-hover: #a8a3ff; --accent-soft: #272561; --accent-text: #bab6ff; --on-accent: #0c0b33;
+  --dnc-bg: #2f2710; --dnc-border: #8a6d1c; --dnc-text: #f2d77a; --dnc-strong: #e7bd3c;
+  --hot: #f2665a; --hot-bg: #341714; --hot-text: #ff9a8f; --win: #6cc07a; --win-bg: #17291b;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4); --shadow-md: 0 8px 26px rgba(0,0,0,.5); --shadow-lg: 0 24px 60px rgba(0,0,0,.7); --overlay: rgba(0,0,10,.65);
+  --skeleton: #1d2040; --skeleton-hi: #292d54; --st-7: #8f89ff;
+  --st-1: #9399c4; --st-2: #7b9bb4; --st-3: #6e9bd0; --st-4: #8a90dc; --st-5: #a58ad8; --st-6: #5fb0bc; --st-8: #6cc07a;
+}
+
+[data-dizain="4"] body { font-size: 16px; line-height: 1.45; font-variant-numeric: tabular-nums; font-weight: 450; }
+[data-dizain="4"] .page-head h1 { font-size: 26px; font-weight: 750; letter-spacing: -.02em; }
+[data-dizain="4"] .panel { border-radius: var(--r-lg); border-color: transparent; box-shadow: var(--shadow-md); }
+[data-dizain="4"] .panel-h { padding: 16px 20px 12px; border-bottom: 0; }
+[data-dizain="4"] .panel-h h2, [data-dizain="4"] .panel-h h3 { font-size: 17px; font-weight: 700; }
+[data-dizain="4"] .panel-b { padding: 16px 20px; }
+[data-dizain="4"] .li { padding: 14px 20px; min-height: 56px; }
+[data-dizain="4"] .btn { height: 48px; border-radius: 14px; padding: 0 18px; font-size: 15px; font-weight: 650; box-shadow: var(--shadow-sm); }
+[data-dizain="4"] .btn.sm { height: 40px; padding: 0 14px; font-size: 14px; }
+[data-dizain="4"] .btn.lg { height: 56px; font-size: 16px; }
+[data-dizain="4"] .btn.icon { width: 48px; }
+[data-dizain="4"] .btn.sm.icon { width: 40px; }
+[data-dizain="4"] .btn.ghost { box-shadow: none; }
+[data-dizain="4"] .badge { height: 26px; font-size: 12.5px; padding: 0 10px; }
+[data-dizain="4"] .chip { height: 40px; padding: 0 16px; font-size: 14.5px; }
+[data-dizain="4"] .input, [data-dizain="4"] select.input { height: 48px; border-radius: 14px; font-size: 16px; }
+[data-dizain="4"] .eyebrow { font-size: 11.5px; letter-spacing: .06em; }
+[data-dizain="4"] .hero-call { border-radius: var(--r-lg); background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000)); color: var(--on-accent); border: 0; padding: 22px; box-shadow: var(--shadow-md); }
+[data-dizain="4"] .hero-call .muted, [data-dizain="4"] .hero-call .eyebrow, [data-dizain="4"] .hero-call .faint { color: color-mix(in srgb, var(--on-accent) 88%, transparent); }
+[data-dizain="4"] .hero-call .big { font-size: 22px; line-height: 1.2; }
+[data-dizain="4"] .hero-call .tag { background: color-mix(in srgb, var(--on-accent) 18%, transparent); border-color: transparent; color: var(--on-accent); }
+[data-dizain="4"] .hero-call .btn.primary { background: var(--on-accent); color: var(--accent); border-color: var(--on-accent); width: 100%; height: 58px; font-size: 17px; }
+[data-dizain="4"] .co-name { font-size: 24px; font-weight: 750; line-height: 1.2; }
+[data-dizain="4"] .co-meta { font-size: 14.5px; }
+[data-dizain="4"] .phone-num { font-size: 24px; }
+[data-dizain="4"] .btn.call { height: 56px; width: 100%; font-size: 17px; border-radius: 16px; }
+[data-dizain="4"] .msgr { min-height: 48px; }
+[data-dizain="4"] .card-head { padding: 20px; }
+[data-dizain="4"] .fact { padding: 12px 20px; }
+[data-dizain="4"] .kc, [data-dizain="4"] .pie { border-radius: 18px; }
+[data-dizain="4"] .bottom-nav a, [data-dizain="4"] .bottom-nav button { font-size: 11.5px; }
+[data-dizain="4"] .bottom-nav a.on { color: var(--accent-text); }
+[data-dizain="4"] .bottom-nav a.on .lucide { background: var(--accent-soft); width: 52px; height: 30px; padding: 5px 16px; border-radius: 15px; stroke-width: 2.2; box-sizing: border-box; }
+
+/* крупные карточки и один столбец: те же правила, что на телефоне, но и на компьютере */
+[data-dizain="4"] .g-main, [data-dizain="4"] .g-2, [data-dizain="4"] .g-3 { grid-template-columns: minmax(0, 1fr); }
+[data-dizain="4"] .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-dizain="4"] .fact:nth-child(2n) { border-right: 0; }
+[data-dizain="4"] .fact:nth-child(n+3) { border-top: 1px solid var(--border); }
+[data-dizain="4"] #fact-next { grid-column: 1 / -1; border-right: 0; }
+[data-dizain="4"] .facts .fact:last-child { grid-column: 1 / -1; border-right: 0; }
+[data-dizain="4"] .card-head > .row { width: 100%; display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+[data-dizain="4"] .card-head > .row .btn { width: 100%; white-space: normal; height: auto; min-height: 48px; min-width: 0; line-height: 1.2; padding: 6px 10px; }
+[data-dizain="4"] .card-head > .row .btn.primary { grid-column: 1 / -1; }
+
+/* ---- компьютер: колонка 560, нижняя панель по центру ---- */
+@media (min-width: 761px) {
+  [data-dizain="4"] .app { grid-template-columns: minmax(0, 1fr); }
+  [data-dizain="4"] .side { display: none; }
+  [data-dizain="4"] .top { padding: 0 24px; }
+  [data-dizain="4"] .crumbs { display: none; }
+  [data-dizain="4"] .top-mobile-brand { display: flex; align-items: center; gap: 8px; font-weight: 800; min-width: 0; }
+  [data-dizain="4"] .top-mobile-brand .brand-mark { width: 28px; height: 28px; }
+  [data-dizain="4"] .search-btn { min-width: 0; width: 240px; white-space: nowrap; overflow: hidden; }
+  [data-dizain="4"] .search-btn .txt { overflow: hidden; text-overflow: ellipsis; }
+  [data-dizain="4"] .search-btn .kbd { display: none; }
+  [data-dizain="4"] .dial .queue-list .list { max-height: 60vh; overflow-y: auto; }
+  [data-dizain="4"] .content { max-width: 1120px; padding: 24px 24px 110px; }
+  [data-dizain="4"] .content:has(.day-plan, .dial, .card-head) { max-width: 560px; }
+  [data-dizain="4"] .content:has(.dial) { max-width: 1280px; }
+  [data-dizain="4"] .bottom-nav {
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; z-index: 40; bottom: 0; left: 50%; transform: translateX(-50%); width: 560px;
+    background: color-mix(in srgb, var(--surface) 96%, transparent); backdrop-filter: blur(12px); border: 1px solid var(--border); border-bottom: 0; border-radius: 22px 22px 0 0; box-shadow: var(--shadow-md);
+    padding: 6px 6px 6px;
+  }
+  [data-dizain="4"] .bottom-nav a, [data-dizain="4"] .bottom-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 52px; font-weight: 700; color: var(--muted); border: 0; background: transparent; border-radius: 12px; position: relative; }
+  [data-dizain="4"] .bottom-nav .lucide { width: 20px; height: 20px; }
+  [data-dizain="4"] .bottom-nav .pip { position: absolute; top: 5px; left: calc(50% + 10px); min-width: 16px; height: 16px; border-radius: 8px; background: var(--hot); color: #fff; font-size: 10px; font-family: var(--mono); display: grid; place-items: center; padding: 0 4px; }
+  [data-dizain="4"] .toasts { bottom: 90px; }
+  [data-dizain="4"] .tour-pop { bottom: auto; }
+  /* обзвон: список слева, колонка по центру */
+  [data-dizain="4"] .dial { display: grid; grid-template-columns: minmax(0, 1fr) 560px minmax(0, 1fr); gap: 16px 20px; align-items: start; }
+  [data-dizain="4"] .dial > .stack { display: contents; }
+  [data-dizain="4"] #dial-company { grid-column: 2; grid-row: 1; }
+  [data-dizain="4"] .dial .hist { grid-column: 2; grid-row: 3; }
+  [data-dizain="4"] .dial .queue-list { grid-column: 1; grid-row: 1 / span 3; justify-self: end; width: 280px; position: sticky; top: calc(var(--top-h) + 16px); }
+  [data-dizain="4"] .dial-top { max-width: 560px; margin-left: auto; margin-right: auto; }
+  [data-dizain="4"] #outcomes-panel { position: fixed; z-index: 35; left: 50%; transform: translateX(-50%); bottom: 64px; width: 560px; }
+}
+
+/* ---- исходы на всю ширину внизу, под большой палец (и телефон, и компьютер) ---- */
+[data-dizain="4"] #outcomes-panel {
+  position: fixed; z-index: 35; left: 0; right: 0; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); margin: 0 auto; max-width: 560px;
+  border-radius: 22px 22px 0 0; border: 1px solid var(--border-strong); border-bottom: 0; box-shadow: 0 -10px 30px rgba(20, 20, 60, .16); background: var(--surface);
+  max-height: 58vh; overflow-y: auto;
+}
+[data-dizain="4"] #outcomes-panel .panel-h { display: none; }
+[data-dizain="4"] #outcomes-panel .panel-b { padding: 10px 10px 8px; }
+[data-dizain="4"] #outcomes-panel .field, [data-dizain="4"] #outcomes-panel .faint { display: none; }
+[data-dizain="4"] #outcomes-panel .panel-b > .row { margin-top: 8px !important; }
+[data-dizain="4"] .outcomes { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+[data-dizain="4"] .oc { grid-column: span 2; min-height: 56px; flex-direction: column; justify-content: center; align-items: center; gap: 2px; padding: 4px 4px; text-align: center; font-size: 12.5px; line-height: 1.15; border-radius: 14px; }
+[data-dizain="4"] .oc .k { display: none; }
+[data-dizain="4"] .oc .lucide { width: 20px; height: 20px; }
+[data-dizain="4"] .oc.good { grid-column: span 6; flex-direction: row; gap: 10px; min-height: 60px; font-size: 17px; background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+[data-dizain="4"] .oc.good:hover { background: var(--accent-hover); }
+[data-dizain="4"] .oc-extra { margin-top: 8px; padding: 10px; }
+[data-dizain="4"] #dial-company { position: relative; touch-action: pan-y; transition: transform 160ms ease, opacity 160ms ease; }
+[data-dizain="4"] #dial-company::after { content: "Свайп влево: следующая компания"; display: block; text-align: center; font-size: 12.5px; color: var(--faint); padding: 0 0 12px; }
+[data-dizain="4"] .dial-top { gap: 10px; }
+[data-dizain="4"] .dial-top .btn { display: none; }
+[data-dizain="4"] .dial-prog { min-width: 0; flex: 1 1 100%; }
+[data-dizain="4"] .dial-prog .row span:first-child { font-size: 22px; font-weight: 750; }
+[data-dizain="4"] .dial-prog .prog { height: 10px; border-radius: 5px; }
+@media (max-width: 760px) {
+  [data-dizain="4"] .content { padding: 16px 14px calc(300px + env(safe-area-inset-bottom, 0px)); }
+  [data-dizain="4"] .content:not(:has(.dial)) { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  [data-dizain="4"] .page-head h1 { font-size: 24px; }
+  [data-dizain="4"] .bottom-nav { border-radius: 22px 22px 0 0; padding-top: 6px; }
+  [data-dizain="4"] .dial { gap: 14px; }
+  [data-dizain="4"] .oc { min-height: 56px; }
+  [data-dizain="4"] .oc.good { min-height: 60px; }
+}
+
+/* анимация входа без transform: иначе position:fixed у панели исходов считается от #view, а не от окна */
+[data-dizain="4"] .view-in { animation-name: viewin4; }
+@keyframes viewin4 { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 761px) {
+  [data-dizain="4"] #outcomes-panel { left: 50%; right: auto; transform: translateX(-50%); width: 560px; margin: 0; bottom: 64px; }
+}

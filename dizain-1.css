@@ -1,0 +1,45 @@
+/* Дизайн 1 «Тихий рабочий»: текущий, доведённый. Светло-серый фон, один бирюзовый акцент, плотная таблица, тонкие линии.
+   Убрано дешёвое: градиенты, тени на кнопках, круглые пилюли везде, мягкие карточки. Характер тот же. */
+:root[data-dizain="1"] {
+  --faint: #667077; --muted: #545d64; --border: #e1e4e7;
+  --r-sm: 4px; --r-md: 6px; --r-lg: 8px;
+  --shadow-sm: none; --shadow-md: 0 2px 10px rgba(20, 30, 35, .07);
+}
+@media (prefers-color-scheme: light) { :root[data-dizain="1"]:not([data-theme="dark"]) { --win: #2a7438; } }
+@media (prefers-color-scheme: dark) {
+  :root[data-dizain="1"]:not([data-theme="light"]) { --faint: #8b959b; --muted: #a2acb2; }
+}
+:root[data-dizain="1"][data-theme="light"] { --win: #2a7438; }
+:root[data-dizain="1"][data-theme="dark"] { --faint: #8b959b; --muted: #a2acb2; }
+
+[data-dizain="1"] body { font-variant-numeric: tabular-nums; font-size: 13.5px; }
+[data-dizain="1"] .page-head h1 { font-size: 20px; font-weight: 700; letter-spacing: -.015em; }
+[data-dizain="1"] .btn { box-shadow: none; font-weight: 600; }
+[data-dizain="1"] .btn.primary { box-shadow: none; }
+[data-dizain="1"] .panel { box-shadow: none; }
+[data-dizain="1"] .panel-h { padding: 11px 16px; background: transparent; }
+[data-dizain="1"] .panel-h h2, [data-dizain="1"] .panel-h h3 { font-size: 13px; font-weight: 700; }
+[data-dizain="1"] .badge { border-radius: 4px; height: 20px; font-size: 11.5px; font-weight: 650; }
+[data-dizain="1"] .badge .dot { width: 6px; height: 6px; }
+[data-dizain="1"] .tag { border-radius: 4px; }
+[data-dizain="1"] .chip { border-radius: 6px; }
+[data-dizain="1"] .nav a { padding: 6px 10px; position: relative; }
+[data-dizain="1"] .nav a.on { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+[data-dizain="1"] .brand-name { font-weight: 750; }
+[data-dizain="1"] .hero-call { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--r-md); }
+[data-dizain="1"] .t th { background: var(--surface-2); font-size: 10.5px; }
+[data-dizain="1"] .t td { padding: 8px 12px; }
+[data-dizain="1"] .kpi .val { font-size: 24px; font-weight: 500; }
+[data-dizain="1"] .kpis.panel { background: var(--surface); }
+[data-dizain="1"] .stage-cell { border-radius: var(--r-md); }
+[data-dizain="1"] .pie { border-radius: var(--r-lg); padding: 14px 15px; }
+[data-dizain="1"] .pie:hover { box-shadow: var(--shadow-md); }
+[data-dizain="1"] .co-name { font-size: 19px; font-weight: 750; }
+[data-dizain="1"] .oc { border-radius: var(--r-md); box-shadow: none; font-weight: 650; }
+[data-dizain="1"] .oc .k { color: var(--muted); }
+[data-dizain="1"] .card-head { padding: 16px 18px; }
+[data-dizain="1"] .fact .l, [data-dizain="1"] .eyebrow { letter-spacing: .06em; }
+[data-dizain="1"] .ev-ico { background: var(--surface); }
+[data-dizain="1"] .side { padding-top: 12px; }
+[data-dizain="1"] .brand-mark { border-radius: 6px; }
+[data-dizain="1"] .modal { border-radius: 10px; }
