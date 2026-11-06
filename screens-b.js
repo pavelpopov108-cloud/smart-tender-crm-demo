@@ -248,7 +248,7 @@
   };
 
   /* ---------- 8. Входящие ---------- */
-  const REGION = { 'Казань': 'anastasia', 'Рязань': 'maxim', 'Улан-Удэ': 'irina', 'Санкт-Петербург': 'elya', 'Новосибирск': 'vitaliy', 'Тюмень': 'ilyana' };
+  const REGION = { 'Казань': 'anastasia', 'Рязань': 'maxim', 'Улан-Удэ': 'irina', 'Санкт-Петербург': 'nikolay', 'Новосибирск': 'vitaliy', 'Тюмень': 'elyana' };
   const t0 = Date.now();
   function leadAgo(l) { return l.ago * 60 + Math.floor((Date.now() - t0) / 1000); }
   function fmtAgo(s) { const m = Math.floor(s / 60), ss = s % 60; return m >= 60 ? `${Math.floor(m / 60)} ч ${m % 60} мин` : `${m} мин ${String(ss).padStart(2, '0')} с`; }
@@ -284,7 +284,7 @@
   /* ---------- 9. Импорт базы ---------- */
   const COLS_IN = [['Наименование', 'ООО «Аэровент Поволжье»', 'name'], ['ИНН', '0068…', 'inn'], ['Телефон', '+7 (900) 000-…', 'phone'], ['Регион', 'Республика Татарстан', 'city'], ['ОКВЭД основной', '43.22 Монтаж систем вентиляции', 'works'], ['Электронная почта', 'info@…', 'email'], ['Выручка за 2025', '48 200 000', 'skip']];
   const FIELDS = [['name', 'Название'], ['inn', 'ИНН (ключ дублей)'], ['phone', 'Телефон (доп. ключ)'], ['city', 'Город'], ['works', 'Вид работ'], ['email', 'Почта'], ['skip', 'Не загружать']];
-  const GEN = { sergey: 'Сергея', maxim: 'Максима', anastasia: 'Анастасии', irina: 'Ирины', elya: 'Эли', ilyana: 'Ильяны', vitaliy: 'Виталия' };
+  const GEN = { sergey: 'Сергея', maxim: 'Максима', anastasia: 'Анастасии', irina: 'Ирины', nikolay: 'Николая', elyana: 'Эляны', vitaliy: 'Виталия' };
   function dupes() {
     const S = A.S; const imp = D.IMPORT;
     const found = S.cos.filter(c => c.pie === imp.pie);
