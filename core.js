@@ -1,7 +1,7 @@
 /* Ядро: состояние, помощники, каркас, маршруты, модалки, поиск Ctrl+K */
 (function () {
   const D = window.DEMO;
-  const KEY = 'st-crm-demo-v2';
+  const KEY = 'st-crm-demo-v3';
   const TODAY = '2026-11-05';
   const NOW0 = new Date(D.NOW).getTime(), T0 = Date.now();
 
@@ -72,7 +72,7 @@
     const r = {}; D.MANAGERS.forEach(m => r[m.id] = D.TODAY_BASE[m.id].slice());
     S.cos.forEach(c => c.history.forEach(h => {
       if (h.d !== TODAY || !h.live || !r[h.who]) return;
-      if (h.type === 'call') { r[h.who][0]++; if (!['no_answer', 'dropped'].includes(h.out)) r[h.who][1]++; if (h.out === 'interest') r[h.who][2]++; }
+      if (h.type === 'call') { r[h.who][0]++; if (!['no_answer', 'dropped', 'wrong_number'].includes(h.out)) r[h.who][1]++; if (h.out === 'interest') r[h.who][2]++; }
       if (h.out === 'contract') r[h.who][3]++;
     }));
     return r;
@@ -90,7 +90,8 @@
     const noStep = S.cos.filter(noNext).map(c => ({ c, days: dayDiff(c.since) }));
     const contracts = S.cos.filter(c => c.stage === 'contract_sent' && dayDiff(c.since) > 2).map(c => ({ c, days: dayDiff(c.since) }));
     const pies = S.pies.filter(p => untilDeadline(p) < 3 * 864e5).sort((a, b) => untilDeadline(a) - untilDeadline(b));
-    return { noStep, contracts, pies, total: noStep.length + contracts.length + pies.length };
+    const silent = window.App.silentList();
+    return { noStep, contracts, pies, silent, total: noStep.length + contracts.length + pies.length + silent.length };
   }
 
   /* ---------- уведомления ---------- */
@@ -152,13 +153,13 @@
     document.getElementById('root').innerHTML = `
     <div class="app">
       <aside class="side">
-        <a class="brand" href="#planerka"><span class="brand-mark">СТ</span><div><div class="brand-name">Смарт Тендер</div><div class="brand-sub">Отдел обзвона</div></div></a>
+        <a class="brand" href="#planerka"><span class="brand-mark"><img src="logo.svg" alt="Смарт Тендер"></span><div><div class="brand-name">Смарт Тендер</div><div class="brand-sub">Отдел обзвона</div></div></a>
         <nav class="nav" id="nav">${groups.map(g => `<div class="nav-label">${g}</div>` + ROUTES.filter(r => r.group === g && !r.hidden).map(r => `<a href="#${r.id}" data-r="${r.id}" data-tip-pos="bottom">${ic(r.icon)}<span class="txt">${r.name}</span>${r.cnt ? `<span class="cnt${r.hot ? ' hot' : ''}" data-cnt="${r.id}"></span>` : ''}</a>`).join('')).join('')}</nav>
         <div class="side-foot"><div class="side-card">Макет для обсуждения. Данные выдуманные, звонки и письма не уходят. <b>Сегодня 05.11.2026.</b></div></div>
       </aside>
       <div class="main">
         <header class="top">
-          <a class="top-mobile-brand" href="#planerka"><span class="brand-mark">СТ</span><span id="mob-title"></span></a>
+          <a class="top-mobile-brand" href="#planerka"><span class="brand-mark"><img src="logo.svg" alt="Смарт Тендер"></span><span id="mob-title"></span></a>
           <div class="crumbs" id="crumbs"></div>
           <button class="search-btn" id="search-btn" aria-label="Поиск">${ic('search')}<span class="txt">Компания, ИНН, телефон…</span><span class="kbd">Ctrl K</span></button>
           <div class="top-actions">

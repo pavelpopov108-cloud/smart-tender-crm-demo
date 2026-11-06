@@ -58,6 +58,7 @@
           ${hot.total ? `
           ${hot.pies.length ? `<div class="hot-group"><h4>Пирожки: срок меньше 3 дней</h4><div class="list">${hot.pies.map(p => { const cd = A.countdown(p); return `<a class="li" href="#pirozhki"><div class="stack" style="gap:1px"><span class="title">${pieName(p)}</span><span class="sub">${p.takenBy ? 'Владелец: ' + person(p.takenBy).name : 'Никто не взял'} · подача до ${dm(p.deadline)}</span></div><span class="end"><span class="countdown hot">${ic('timer')}${cd.txt}</span></span></a>`; }).join('')}</div></div>` : ''}
           ${hot.contracts.length ? `<div class="hot-group"><h4>Договор без ответа больше 2 дней</h4><div class="list">${hot.contracts.map(({ c, days }) => `<a class="li" href="#kompaniya-${c.id}">${av(c.owner)}<div class="stack" style="gap:1px;min-width:0"><span class="title ell">${esc(c.name)}</span><span class="sub">${c.city} · отправлен ${dm(c.since)}</span></div><span class="end"><span class="badge hot">${A.days(days)}</span></span></a>`).join('')}</div></div>` : ''}
+          ${hot.silent.length ? `<div class="hot-group" id="hot-silent"><h4>Клиент замолчал после «Интересно» (больше ${A.SILENCE_H} раб. ч)</h4><div class="list">${hot.silent.map(({ c, h }) => `<a class="li" href="#kompaniya-${c.id}">${av(c.owner)}<div class="stack" style="gap:1px;min-width:0"><span class="title ell">${esc(c.name)}</span><span class="sub">${c.city} · напомнить о себе</span></div><span class="end"><span class="badge hot">${A.silentTxt(h)} тишины</span></span></a>`).join('')}</div></div>` : ''}
           ${hot.noStep.length ? `<div class="hot-group"><h4>Нет следующего шага</h4><div class="list">${hot.noStep.map(({ c, days }) => `<a class="li" href="#kompaniya-${c.id}">${av(c.owner)}<div class="stack" style="gap:1px;min-width:0"><span class="title ell">${esc(c.name)}</span><span class="sub">${A.stage(c.stage).name} · ${c.city}</span></div><span class="end"><span class="badge hot">${A.days(days)} тишины</span></span></a>`).join('')}</div></div>` : ''}`
           : `<div class="empty"><div class="ico">${ic('check')}</div><b>Ничего не горит</b><span>У всех сделок есть следующий шаг.</span></div>`}
         </section>
@@ -105,14 +106,20 @@
     const stagesShown = ['interest', 'pie_sent', 'profile', 'wait_pod', 'pod_sent', 'contract_sent', 'signed', 'accred', 'participation', 'result'];
     const myByStage = stagesShown.map(s => [s, mine.filter(c => c.stage === s).length]).filter(x => x[1]);
     const firstPie = myPies[0];
+    const planPie = firstPie || pie(D.DAY_PLAN.pie);
+    const planList = S.cos.filter(c => c.pie === planPie.id && c.stage !== 'refused' && !(S.dial[planPie.id]?.done || {})[c.id]);
+    const planN = planList.length;
+    const silent = A.silentList(me);
     const qLeft = firstPie ? S.cos.filter(c => c.pie === firstPie.id && c.stage !== 'refused' && !(S.dial[firstPie.id]?.done || {})[c.id]).length : 0;
     const html = `
     <div class="page-head"><div><h1>Мой день</h1><div class="sub">${p.name}: ${todayList.length} ${A.plural(todayList.length, 'дело', 'дела', 'дел')} на сегодня, ${mine.filter(c => A.ACTIVE.includes(c.stage)).length} клиентов в работе</div></div></div>
-    <div class="hero-call" id="start-call">
-      <div style="flex:1;min-width:220px">${firstPie ? `<div class="eyebrow">Ваш пирожок</div><div class="big">${pieName(firstPie)}: ${qLeft} ${A.plural(qLeft, 'компания', 'компании', 'компаний')} в очереди</div><div class="muted">Подача до ${dm(firstPie.deadline)}, осталось ${A.countdown(firstPie).txt}</div>`
-        : `<div class="eyebrow">Пирожок не выбран</div><div class="big">Возьмите пирожок, и его компании закрепятся за вами на 7 дней</div><div class="muted">Свободных сейчас: ${A.counts().freePies}</div>`}</div>
-      ${firstPie ? `<a class="btn primary lg" href="#obzvon-${firstPie.id}">${ic('phone-call')}Начать обзвон</a>` : `<a class="btn primary lg" href="#pirozhki">${ic('croissant')}Выбрать пирожок</a>`}
+    <div class="hero-call day-plan" id="start-call">
+      <div style="flex:1;min-width:220px"><div class="eyebrow">Обзвон на сегодня</div><div class="big" id="day-plan-title">Обзвон на сегодня: ${planN} ${A.plural(planN, 'компания', 'компании', 'компаний')}</div>
+        <div class="muted">Уже загружены, с ИНН. Пирожок «${pieName(planPie)}», подача до ${dm(planPie.deadline)}, осталось ${A.countdown(planPie).txt}</div>
+        <div class="plan-inn">${planList.slice(0, 4).map(c => `<span class="tag"><span class="mono">${c.inn}</span> ${esc(c.name.replace(/^ООО /, ''))}</span>`).join('')}${planN > 4 ? `<span class="faint" style="font-size:12px">и ещё ${planN - 4}</span>` : ''}</div></div>
+      <button class="btn primary lg" id="plan-start">${ic('phone-call')}Начать</button>
     </div>
+    ${silent.length ? `<section class="panel" id="remind-panel" style="margin-bottom:16px"><div class="panel-h"><h2>${ic('bell-ring')}Напомнить о себе</h2><span class="meta num">${silent.length}</span></div><div class="list">${silent.map(({ c, h }) => `<a class="li" href="#kompaniya-${c.id}"><span class="hot-dot"></span><div class="stack" style="gap:1px;min-width:0"><span class="title ell">${esc(c.name)}</span><span class="sub">Интересно, ответа нет ${A.silentTxt(h)} · ${c.city}</span></div><span class="end"><span class="btn sm">Написать</span></span></a>`).join('')}</div></section>` : ''}
     <div class="grid g-main">
       <section class="panel agenda">
         <div class="panel-h"><h2>${ic('calendar-check')}Перезвоны и дела на сегодня</h2><span class="meta num">${todayList.length}</span></div>
@@ -128,7 +135,7 @@
             : `<div class="empty" style="padding:22px"><div class="ico">${ic('croissant')}</div><b>Нет пирожков</b><span>Возьмите свободный на доске «Пирожки».</span><a class="btn sm" href="#pirozhki">Открыть доску</a></div>`}</section>
       </div>
     </div>`;
-    return { html };
+    return { html, mount: v => { $('#plan-start', v).onclick = () => { if (!planPie.takenBy) { const n = A.takePie(planPie.id); A.toast(`Пирожок ваш до ${dm(planPie.takenUntil)}. Закреплено ${n} компаний`, 'hand'); } location.hash = '#obzvon-' + planPie.id; }; } };
   };
 
   /* ---------- 3. Пирожки ---------- */
@@ -159,6 +166,7 @@
         <div class="pie-top"><div style="flex:1;min-width:0"><div class="pie-city">${p.city}</div><div class="pie-work">${p.work} · ${p.law}</div></div>
           ${p.takenBy ? `<span class="row" style="gap:6px">${av(p.takenBy)}<span class="faint" style="font-size:12px">до ${dm(p.takenUntil)}</span></span>` : '<span class="badge acc">Свободен</span>'}</div>
         <p class="pie-title">${esc(p.title)}</p>
+        ${A.urgent(p) ? `<div class="hot-note" data-hot-note>${ic('flame')}<span>Срок близко: предлагай сотрудничество, а не этот тендер</span></div>` : ''}
         <div class="pie-money"><div><div class="l">Сумма</div><div class="v">${money(p.amount, true)}</div></div><div><div class="l">Аванс</div><div class="v">${p.advance ? p.advance + ' %' : '<span class="faint">нет</span>'}</div></div>
           <div><div class="l">Подача</div><div class="v ${cd.hot ? 'hot' : ''}" data-tip="до ${dm(p.deadline)} ${p.deadline.slice(11)}">${cd.txt}</div></div></div>
         <div class="stack" style="gap:6px"><div class="row" style="justify-content:space-between;font-size:12.5px"><span class="muted">Обзвонено</span><span class="num">${st.called} из ${st.total}</span></div><div class="prog"><i style="width:${st.called / st.total * 100}%"></i></div></div>
@@ -190,6 +198,7 @@
   const OUT = [
     { k: 'no_answer', n: 'Не дозвонился', i: 'phone-missed' },
     { k: 'dropped', n: 'Сбросил', i: 'phone-off' },
+    { k: 'wrong_number', n: 'Номер не тот', i: 'phone-forwarded' },
     { k: 'secretary', n: 'Секретарь', i: 'user-round' },
     { k: 'not_interested', n: 'Неинтересно', i: 'thumbs-down' },
     { k: 'callback', n: 'Перезвонить', i: 'calendar-clock' },
@@ -197,6 +206,8 @@
   ];
   const REASONS = ['Нет допуска СРО', 'Нет лицензии МЧС', 'Не работают с госзаказом', 'Загружены', 'Не их профиль', 'Уже работают с кем-то', 'Другое'];
   A.OUT = OUT;
+  A.urgent = p => A.untilDeadline(p) < A.URGENT_DAYS * 864e5 && A.untilDeadline(p) > 0;
+  let pendingSend = null, pendingNewPhone = '';
   const outName = k => (OUT.find(o => o.k === k) || {}).n;
 
   function queueOf(pid) {
@@ -207,13 +218,16 @@
 
   A.recordOutcome = function (pid, cid, out, extra = {}) {
     const S = A.S, c = co(cid), ds = dialState(pid);
-    const texts = { no_answer: 'Не дозвонился', dropped: 'Сбросил', secretary: 'Секретарь: ' + (extra.note || 'попросили отправить на почту'), not_interested: 'Неинтересно. Причина: ' + (extra.reason || 'не указана'), callback: 'Перезвонить ' + A.relDay(extra.d || A.addDays(A.TODAY, 1)) + ' в ' + (extra.t || '10:00'), interest: 'Интересно' + (extra.note ? ': ' + extra.note : '') };
+    const texts = { no_answer: 'Не дозвонился', dropped: 'Сбросил', wrong_number: 'Номер не тот' + (extra.newPhone ? ', новый номер ' + extra.newPhone : ', нужен новый номер'), secretary: 'Секретарь: ' + (extra.note || 'попросили отправить на почту'), not_interested: 'Неинтересно. Причина: ' + (extra.reason || 'не указана'), callback: 'Перезвонить ' + A.relDay(extra.d || A.addDays(A.TODAY, 1)) + ' в ' + (extra.t || '10:00'), interest: 'Интересно' + (extra.note ? ': ' + extra.note : '') };
     A.addHist(c, { type: 'call', out, text: texts[out] + (extra.note && out !== 'secretary' && out !== 'interest' ? '. ' + extra.note : ''), pie: pid });
     if (!c.owner) c.owner = S.me;
+    if (out === 'wrong_number') A.setWrongPhone(c, extra.newPhone);
+    if (out === 'interest') c.waitReply = A.stamp();
     if (out === 'not_interested') { c.stage = 'refused'; c.refusal = extra.reason; c.since = A.TODAY; c.next = null; }
     else if (out === 'interest') { c.stage = 'interest'; c.since = A.TODAY; c.next = { d: extra.d || A.addDays(A.TODAY, 1), t: extra.t || '10:00', text: extra.nextText || 'Отправить пирожок и уточнить профиль' }; }
     else if (out === 'callback') { if (c.stage === 'base') c.stage = 'calling'; c.since = c.since || A.TODAY; c.next = { d: extra.d || A.addDays(A.TODAY, 1), t: extra.t || '10:00', text: 'Перезвонить' + (extra.note ? ': ' + extra.note : '') }; }
     else if (c.stage === 'base') { c.stage = 'calling'; c.since = A.TODAY; }
+    if (out === 'interest' && extra.send) A.sendMaterial(c, 'presentation', extra.send);
     ds.done[cid] = out; ds.idx++;
     A.save();
   };
@@ -253,6 +267,7 @@
     const notMine = p.takenBy !== S.me;
     const blocked = !!c.dnc || blockedOwner || notMine;
     const banners = [];
+    if (A.urgent(p)) banners.push(`<div class="hot-note" id="hot-pie-note">${ic('flame')}<span><b>Срок близко: предлагай сотрудничество, а не этот тендер.</b> Подача до ${dm(p.deadline)}, осталось ${cd.txt}.</span></div>`);
     if (notMine) banners.push(p.takenBy ? `<div class="warn-line">${ic('lock')}<span><b>Пирожок закреплён: ${person(p.takenBy).name} до ${dm(p.takenUntil)}.</b> Его компании в обзвоне у владельца. Можно попросить передать пирожок.</span></div>`
       : `<div class="warn-line" style="background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 30%,transparent)">${ic('hand')}<span style="flex:1"><b>Пирожок свободен.</b> Возьмите его, и свободные компании закрепятся за вами на 7 дней. Без владельца звонить нельзя.</span><button class="btn sm primary" id="take-here">Беру</button></div>`);
     if (c.dnc) banners.push(`<div class="dnc-banner" id="dnc-banner">${ic('hand')}<div><b>Не звонить: клиент в переговорах. Владелец: ${person(c.owner).name}</b><span>${esc(c.dnc)}</span><div class="row" style="margin-top:10px;flex-wrap:wrap"><button class="btn sm warn" data-skip style="background:var(--surface)">${ic('skip-forward')}Пропустить</button><button class="btn sm ghost" data-msg="${c.owner}" style="color:var(--dnc-text)">${ic('message-square')}Написать владельцу</button></div></div></div>`);
@@ -268,16 +283,17 @@
           <div class="row" style="align-items:flex-start;gap:12px"><div style="flex:1;min-width:0"><a class="co-name" href="#kompaniya-${c.id}">${esc(c.name)}</a>
             <div class="co-meta"><span>${ic('hash')}ИНН <span class="mono">${c.inn}</span></span><span>${ic('map-pin')}${c.city}</span><span>${ic('wrench')}${c.works.join(', ')}</span>${c.licenses.length ? `<span>${ic('shield-check')}${c.licenses.join(', ')}</span>` : ''}</div></div>
             <div class="row" style="gap:6px">${c.dnc ? '<span class="badge dnc">Не звонить</span>' : ''}${c.owner ? av(c.owner) : '<span class="badge">Свободна</span>'}</div></div>
-          <div class="phone-row"><span class="phone-num">${c.phone}</span>
-            ${blocked ? `<button class="btn call" disabled>${ic('phone')}Позвонить</button>` : `<a class="btn primary call" href="tel:${c.phone.replace(/[^\d+]/g, '')}">${ic('phone')}Позвонить</a>`}
+          <div class="phone-row">${pendingOut === 'wrong_number' && !blocked ? `<span class="phone-bad"><span class="phone-num struck">${c.phone}</span><span class="badge hot">не их номер</span></span><input class="input" id="new-phone" placeholder="Новый номер" value="${esc(pendingNewPhone)}" style="width:170px">` : A.phoneHtml(c)}
+            ${blocked || A.needPhone(c) ? `<button class="btn call" disabled>${ic('phone')}Позвонить</button>` : `<a class="btn primary call" href="tel:${c.phone.replace(/[^\d+]/g, '')}">${ic('phone')}Позвонить</a>`}
             <button class="btn icon" data-copy="${c.phone}" data-tip="Скопировать номер">${ic('copy')}</button></div>
+          <div class="phone-row msgr-row">${A.msgrBtns()}${A.needPhone(c) ? `<button class="btn" id="find-phone-d">${ic('search')}Искать номер</button>` : ''}</div>
           <div class="muted" style="font-size:12.5px">${ic('user')} ${esc(c.contact.name)}, ${c.contact.role}</div>
         </div></section>
         <section class="panel hist"><div class="panel-h"><h3>${ic('history')}История касаний</h3><span class="meta">все менеджеры · ${c.history.length}</span></div>
           <div class="panel-b">${c.history.length ? feed(c.history.slice(0, 8)) : `<div class="empty" style="padding:18px"><div class="ico">${ic('phone')}</div><b>Звонков ещё не было</b><span>Вы первый. Исход появится здесь и у всех коллег.</span></div>`}</div></section>
       </div>
       <div class="stack" style="gap:16px">
-        <section class="panel" id="outcomes-panel"><div class="panel-h"><h3>${ic('mouse-pointer-click')}Исход звонка</h3><span class="meta hide-mob">клавиши 1–6</span></div>
+        <section class="panel" id="outcomes-panel"><div class="panel-h"><h3>${ic('mouse-pointer-click')}Исход звонка</h3><span class="meta hide-mob">клавиши 1–${OUT.length}</span></div>
           <div class="panel-b">
             ${blocked ? `<div class="empty" style="padding:18px 8px"><div class="ico">${ic('lock')}</div><b>${notMine && !c.dnc ? (p.takenBy ? 'Пирожок у коллеги' : 'Сначала возьмите пирожок') : c.dnc ? 'Звонить нельзя' : 'Компания закреплена за коллегой'}</b><span>${notMine && !c.dnc ? 'Исходы откроются, когда пирожок будет вашим.' : 'Исходы недоступны. Пропустите компанию.'}</span><button class="btn primary" data-skip id="skip-btn">${ic('skip-forward')}Пропустить</button></div>`
               : `<div class="outcomes" id="outcomes">${OUT.map((o, i) => `<button class="oc ${o.good ? 'good' : ''} ${pendingOut === o.k ? 'sel' : ''}" data-out="${o.k}">${ic(o.i)}${o.n}<span class="k">${i + 1}</span></button>`).join('')}</div>
@@ -297,6 +313,7 @@
         $$('[data-msg]', v).forEach(b => b.onclick = () => A.toast(`${person(b.dataset.msg).name} получит сообщение со ссылкой на компанию`, 'send'));
         $$('[data-copy]', v).forEach(b => b.onclick = () => { try { navigator.clipboard.writeText(b.dataset.copy).catch(() => { }); } catch (e) { } A.toast('Номер скопирован', 'copy'); });
         const pick = k => {
+          if (k === 'interest') pendingSend = null;
           if (['no_answer', 'dropped', 'secretary'].includes(k)) {
             A.recordOutcome(pid, c.id, k, { note: note() }); pendingOut = null; S._note = '';
             A.toast(`Записано: ${outName(k)}. Следующая компания`); A.render();
@@ -305,11 +322,16 @@
         $$('[data-out]', v).forEach(b => b.onclick = () => pick(b.dataset.out));
         $$('[data-reason]', v).forEach(b => b.onclick = () => { pendingReason = b.dataset.reason; $$('[data-reason]', v).forEach(x => x.classList.toggle('on', x === b)); });
         $$('[data-when]', v).forEach(b => b.onclick = () => { pendingWhen = b.dataset.when.split('|'); $$('[data-when]', v).forEach(x => x.classList.toggle('on', x === b)); const [d, t] = pendingWhen; const di = $('#cb-date', v), ti = $('#cb-time', v); if (di) di.value = d; if (ti) ti.value = t; });
+        const np = $('#new-phone', v); if (np) np.oninput = () => { pendingNewPhone = np.value; };
+        $$('[data-send]', v).forEach(b => b.onclick = () => { pendingSend = b.dataset.send || null; $$('[data-send]', v).forEach(x => x.classList.toggle('on', x === b)); });
+        const fd = $('#find-phone-d', v); if (fd) fd.onclick = () => A.searchMenu(c, fd);
         const sv = $('#save-out', v);
         if (sv) sv.onclick = () => {
           const ex = { note: note() };
           if (pendingOut === 'not_interested') { if (!pendingReason) { A.toast('Выберите причину отказа', 'info'); return; } ex.reason = pendingReason; }
           if (pendingOut === 'callback' || pendingOut === 'interest') { ex.d = ($('#cb-date', v) || {}).value || A.addDays(A.TODAY, 1); ex.t = ($('#cb-time', v) || {}).value || '10:00'; ex.nextText = ($('#cb-text', v) || {}).value; }
+          if (pendingOut === 'wrong_number') ex.newPhone = ($('#new-phone', v) || {}).value.trim();
+          if (pendingOut === 'interest') ex.send = pendingSend;
           const k = pendingOut;
           A.recordOutcome(pid, c.id, k, ex); pendingOut = null; S._note = '';
           A.toast(k === 'interest' ? `Клиент «${c.name}» ваш. Следующий шаг: ${A.relDay(ex.d)} в ${ex.t}` : `Записано: ${outName(k)}. Следующая компания`, k === 'interest' ? 'sparkles' : 'check');
@@ -317,36 +339,38 @@
         };
         A._dialKeys = e => {
           if (location.hash.indexOf('#obzvon') !== 0 || blocked || /input|textarea|select/i.test(document.activeElement.tagName) || document.getElementById('modal')) return;
-          const n = +e.key; if (n >= 1 && n <= 6) pick(OUT[n - 1].k);
+          const n = +e.key; if (n >= 1 && n <= OUT.length) pick(OUT[n - 1].k);
         };
       },
     };
   };
   document.addEventListener('keydown', e => A._dialKeys && A._dialKeys(e));
-  A.resetDialUi = () => { pendingOut = null; pendingReason = null; pendingWhen = null; };
+  A.resetDialUi = () => { pendingOut = null; pendingReason = null; pendingWhen = null; pendingSend = null; pendingNewPhone = ''; };
   A.setPendingOut = k => { pendingOut = k; };
 
   function extraForm(k) {
     const tmr = A.addDays(A.TODAY, 1);
     const whenChips = [[A.TODAY + '|16:00', 'Сегодня 16:00'], [tmr + '|10:00', 'Завтра 10:00'], [tmr + '|14:00', 'Завтра 14:00'], [A.addDays(A.TODAY, 4) + '|10:00', 'Пн 10:00']];
+    if (k === 'wrong_number') return `<div class="oc-extra"><div class="eyebrow">Номер не тот: впишите новый или оставьте пустым</div><span class="faint" style="font-size:12px">Старый номер станет зачёркнутым «не их номер». Найти новый можно в карточке: «Искать номер».</span></div>`;
     if (k === 'not_interested') return `<div class="oc-extra"><div class="eyebrow">Причина отказа</div><div class="chips">${REASONS.map(r => `<button class="chip ${pendingReason === r ? 'on' : ''}" data-reason="${r}">${r}</button>`).join('')}</div><span class="faint" style="font-size:12px">Компания уйдёт в отказ. Коллеги увидят причину при импорте и поиске.</span></div>`;
     const dflt = (pendingWhen || [tmr, '10:00']);
     return `<div class="oc-extra"><div class="eyebrow">${k === 'interest' ? 'Следующий шаг: без него сделка покраснеет' : 'Когда перезвонить'}</div>
       <div class="chips">${whenChips.map(([v, n]) => `<button class="chip ${pendingWhen && pendingWhen.join('|') === v ? 'on' : ''}" data-when="${v}">${n}</button>`).join('')}</div>
       <div class="row" style="gap:8px"><input type="date" class="input" id="cb-date" value="${dflt[0]}" style="flex:1"><input type="time" class="input" id="cb-time" value="${dflt[1]}" style="width:110px"></div>
-      ${k === 'interest' ? `<input class="input" id="cb-text" value="Отправить пирожок и уточнить профиль">` : ''}</div>`;
+      ${k === 'interest' ? `<input class="input" id="cb-text" value="Отправить пирожок и уточнить профиль">
+      <div class="eyebrow">Отправить презентацию</div><div class="chips" id="send-chips"><button class="chip ${!pendingSend ? 'on' : ''}" data-send="">Не сейчас</button><button class="chip ${pendingSend === 'mail' ? 'on' : ''}" data-send="mail">${ic('mail')}На почту</button><button class="chip ${pendingSend === 'wa' ? 'on' : ''}" data-send="wa">${ic('message-circle')}В WhatsApp</button></div>` : ''}</div>`;
   }
 
   /* лента касаний — общая для обзвона и карточки */
   const EV = {
     no_answer: ['phone-missed', ''], dropped: ['phone-off', 'bad'], secretary: ['user-round', ''], not_interested: ['thumbs-down', 'bad'], callback: ['calendar-clock', ''],
     interest: ['sparkles', 'send'], pie: ['croissant', 'send'], pod: ['list-checks', 'send'], request: ['send', 'q'], contract: ['file-signature', 'send'], profile: ['clipboard-list', ''],
-    signed: ['badge-check', 'send'], accred: ['key-round', ''], part: ['gavel', ''], result: ['trophy', 'send'], note: ['sticky-note', ''], question: ['circle-help', 'q'], answer: ['message-square-reply', 'q'], stage: ['move-right', ''],
+    signed: ['badge-check', 'send'], accred: ['key-round', ''], part: ['gavel', ''], result: ['trophy', 'send'], note: ['sticky-note', ''], material: ['paperclip', 'send'], chat: ['message-square-text', ''], wrong_number: ['phone-forwarded', 'bad'], question: ['circle-help', 'q'], answer: ['message-square-reply', 'q'], stage: ['move-right', ''],
   };
   function feed(items) {
     return `<div class="feed">${items.map(h => {
       const [i, cls] = EV[h.out] || ['dot', ''];
-      const kind = h.type === 'call' ? 'звонок' : h.type === 'send' ? 'отправлено' : h.type === 'pod' ? 'запрос подборки' : h.type === 'note' ? 'заметка' : h.type === 'question' ? 'вопрос специалисту' : '';
+      const kind = h.type === 'call' ? 'звонок' : h.type === 'send' ? 'отправлено' : h.type === 'pod' ? 'запрос подборки' : h.type === 'note' ? 'заметка' : h.type === 'chat' ? 'переписка' : h.type === 'question' ? 'вопрос специалисту' : '';
       return `<div class="ev"><span class="ev-ico ${cls}">${ic(i)}</span><div style="min-width:0"><div class="ev-h">${av(h.who, 'xs')}<b>${person(h.who).name}</b><span class="faint">${kind}</span>${h.pie && h.out === 'pie' ? `<span class="tag">${pieName(pie(h.pie))}</span>` : ''}<span class="when">${A.relDay(h.d)} ${h.t}</span></div>
         <div class="ev-t">${esc(h.text)}</div></div></div>`;
     }).join('')}</div>`;

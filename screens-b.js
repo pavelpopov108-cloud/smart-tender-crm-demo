@@ -8,16 +8,20 @@
     if (!c) return { html: `<div class="panel"><div class="empty" style="padding:56px 20px"><div class="ico">${ic('building-2')}</div><b>Компания не найдена</b><span>Возможно, ссылка устарела. Найдите компанию через поиск.</span><button class="btn" onclick="App.openPalette()">${ic('search')}Поиск</button></div></div>`, crumbs: ['Клиенты', 'Не найдено'] };
     const p = pie(c.pie), lockedOther = A.isLocked(c);
     const sinceDays = c.since ? A.dayDiff(c.since) : null;
-    const sent = c.history.filter(h => ['pie', 'pod', 'contract'].includes(h.out));
+    const sent = c.history.filter(h => ['pie', 'pod', 'contract', 'material'].includes(h.out));
     const html = `
     ${c.dnc ? `<div class="dnc-banner">${ic('hand')}<div><b>Не звонить с чужих пирожков: клиент в переговорах. Владелец: ${person(c.owner).name}</b><span>${esc(c.dnc)}</span></div></div>` : ''}
     <section class="panel" style="margin-bottom:16px">
       <div class="card-head">
         <div class="ttl"><div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:6px">${stageBadge(c.stage)}${c.dnc ? '<span class="badge dnc">Не звонить</span>' : ''}${c.won ? '<span class="badge win">Победа</span>' : ''}${p ? `<span class="tag">${ic('croissant')}&nbsp;${pieName(p)}</span>` : ''}</div>
           <h1 style="font-size:22px;font-weight:800;letter-spacing:-.02em">${esc(c.name)}</h1>
-          <div class="co-meta"><span>${ic('hash')}ИНН <span class="mono">${c.inn}</span></span><span>${ic('map-pin')}${c.city}</span><span>${ic('phone')}<span class="mono">${c.phone}</span></span><span>${ic('user')}${esc(c.contact.name)}, ${c.contact.role}</span></div></div>
+          <div class="co-meta"><span>${ic('hash')}ИНН <span class="mono">${c.inn}</span></span><span>${ic('map-pin')}${c.city}</span><span>${ic('phone')}${A.phoneHtml(c, 'mono')}</span><span>${ic('user')}${esc(c.contact.name)}, ${c.contact.role}</span><span class="turn">${ic('banknote')}Оборот <input class="input inline" id="turnover" type="number" min="0" value="${c.turnover}" aria-label="Оборот, млн ₽"> млн ₽${c.turnover > 100 ? ' <span class="badge hot" id="big-badge">крупная, не наша ЦА</span>' : ''}</span></div>
+          ${A.needPhone(c) || c.badPhone ? `<div class="row bad-phone-row" style="gap:8px;margin-top:8px;flex-wrap:wrap">${A.needPhone(c) ? `<input class="input" id="np-in" placeholder="Новый номер" style="width:180px"><button class="btn sm" id="np-save">Сохранить номер</button>` : ''}</div>` : ''}</div>
         <div class="row" style="gap:8px;flex-wrap:wrap">
-          ${c.dnc && c.owner !== S.me ? `<button class="btn" disabled data-tip="Клиент в переговорах у коллеги">${ic('phone')}Позвонить</button>` : `<a class="btn" href="tel:${c.phone.replace(/[^\d+]/g, '')}">${ic('phone')}Позвонить</a>`}
+          ${(c.dnc && c.owner !== S.me) || A.needPhone(c) ? `<button class="btn" disabled data-tip="${A.needPhone(c) ? 'Номер не тот: найдите новый' : 'Клиент в переговорах у коллеги'}">${ic('phone')}Позвонить</button>` : `<a class="btn" href="tel:${c.phone.replace(/[^\d+]/g, '')}">${ic('phone')}Позвонить</a>`}
+          ${A.msgrBtns()}
+          <span class="rel"><button class="btn" id="find-phone">${ic('search')}Искать номер${ic('chevron-down')}</button></span>
+          <button class="btn" id="btn-presentation">${ic('presentation')}Отправить презентацию</button>
           <button class="btn" id="btn-pie">${ic('croissant')}Отправить пирожок</button>
           <button class="btn" id="btn-podborka">${ic('list-checks')}Запросить подборку</button>
           <button class="btn primary" id="btn-contract">${ic('file-signature')}Отправить договор</button>
@@ -32,7 +36,7 @@
     </section>
     <div class="grid g-main">
       <section class="panel"><div class="panel-h"><h2>${ic('history')}Лента касаний</h2><span class="meta">видят все менеджеры</span></div>
-        <div class="panel-b"><div class="row" style="margin-bottom:6px"><input class="input" id="note-in" placeholder="Заметка: что сказал клиент, о чём договорились"><button class="btn" id="note-add">${ic('plus')}<span class="hide-mob">Добавить</span></button></div>
+        <div class="panel-b"><div class="row" style="margin-bottom:6px;flex-wrap:wrap"><button class="btn" id="paste-chat" style="flex:none">${ic('clipboard-paste')}Вставить из переписки</button></div><div class="row" style="margin-bottom:6px"><input class="input" id="note-in" placeholder="Заметка: что сказал клиент, о чём договорились"><button class="btn" id="note-add">${ic('plus')}<span class="hide-mob">Добавить</span></button></div>
           ${c.history.length ? A.feed(c.history) : `<div class="empty"><div class="ico">${ic('history')}</div><b>Касаний ещё не было</b><span>Звонки, письма и отправленные пирожки появятся здесь.</span></div>`}</div></section>
       <div class="stack" style="gap:16px">
         <section class="panel" id="q-panel"><div class="panel-h"><h2>${ic('circle-help')}Вопросы специалисту</h2><span class="meta">${av('pavel', 'xs')}Павел</span></div>
@@ -47,7 +51,7 @@
           <div class="panel-b">${c.profile ? `<dl class="kv"><dt>Регионы</dt><dd>${c.profile.regions.map(r => `<span class="tag">${esc(r)}</span>`).join('')}</dd><dt>Виды работ</dt><dd>${c.profile.works.map(r => `<span class="tag">${esc(r)}</span>`).join('')}</dd><dt>Лицензии</dt><dd>${c.profile.licenses.map(r => `<span class="tag">${esc(r)}</span>`).join('')}</dd><dt>Сумма от</dt><dd>${c.profile.min}</dd><dt>Аванс</dt><dd>${c.profile.advance}</dd></dl>`
             : `<div class="empty" style="padding:14px"><b>Профиль не уточнён</b><span>Регионы, виды работ и допуски нужны Павлу для подборки.</span><button class="btn sm" id="prof-fill">Заполнить</button></div>`}</div></section>
         <section class="panel"><div class="panel-h"><h2>${ic('send')}Что отправлено</h2><span class="meta num">${sent.length}</span></div>
-          <div class="panel-b">${sent.length ? `<div class="sent-list">${sent.map(h => `<div class="sent">${ic(h.out === 'pie' ? 'croissant' : h.out === 'pod' ? 'list-checks' : 'file-signature')}<span class="ell" style="flex:1">${esc(h.text)}${h.pie ? ': ' + pieName(pie(h.pie)) : ''}</span>${av(h.who, 'xs')}<span class="faint mono" style="font-size:12px">${dm(h.d)}</span></div>`).join('')}</div>`
+          <div class="panel-b">${sent.length ? `<div class="sent-list">${sent.map(h => `<div class="sent">${ic(h.out === 'pie' ? 'croissant' : h.out === 'pod' ? 'list-checks' : h.out === 'material' ? 'paperclip' : 'file-signature')}<span class="ell" style="flex:1">${esc(h.text)}${h.pie ? ': ' + pieName(pie(h.pie)) : ''}</span>${av(h.who, 'xs')}<span class="faint mono" style="font-size:12px">${dm(h.d)}</span></div>`).join('')}</div>`
             : `<div class="empty" style="padding:14px"><b>Ничего не отправляли</b><span>Пирожки, подборки и договоры появятся здесь с датой и автором.</span></div>`}</div></section>
       </div>
     </div>`;
@@ -55,7 +59,12 @@
       crumbs: ['<a href="#klienty">Клиенты</a>', esc(c.name)], html, mount: v => {
         $('#btn-pie', v).onclick = () => sendPieModal(c);
         $('#btn-podborka', v).onclick = () => podborkaModal(c);
-        $('#btn-contract', v).onclick = () => contractModal(c);
+        $('#btn-contract', v).onclick = () => A.contractModal(c);
+        $('#btn-presentation', v).onclick = () => A.materialModal(c, 'presentation');
+        $('#paste-chat', v).onclick = () => A.pasteModal(c);
+        $('#find-phone', v).onclick = e => { e.stopPropagation(); A.searchMenu(c, e.currentTarget); };
+        $('#turnover', v).onchange = e => { c.turnover = +e.target.value || 0; A.save(); A.render({ keepScroll: true }); };
+        const nps = $('#np-save', v); if (nps) nps.onclick = () => { const x = $('#np-in', v).value.trim(); if (!x) { A.toast('Впишите новый номер', 'info'); return; } c.phone = x; A.addHist(c, { type: 'call', out: 'note', text: 'Найден новый номер: ' + x }); A.save(); A.render(); A.toast('Новый номер сохранён', 'phone'); };
         $('#set-next', v).onclick = () => nextStepModal(c);
         const at = $('#ask-transfer', v); if (at) at.onclick = () => A.toast(`${person(c.owner).name} получит просьбу передать компанию`, 'send');
         const pf = $('#prof-fill', v) || $('#prof-edit', v); if (pf) pf.onclick = () => profileModal(c);
@@ -111,24 +120,6 @@
         <div class="field"><label for="pd-note">Что ещё важно Павлу</label><textarea class="input" id="pd-note" rows="2" placeholder="Например: только с авансом, до 15 млн"></textarea></div>
         <span class="faint" style="font-size:12px">Запрос встанет в очередь Павла с профилем. Клиент перейдёт на этап «Ждёт подборку».</span>`,
       onOk: o => { A.requestPodborka(c, $('#pd-note', o).value.trim()); A.render(); A.toast('Запрос ушёл Павлу. Клиент ждёт подборку', 'send'); },
-    });
-  }
-  function contractModal(c) {
-    const S = A.S; let tariff = 1;
-    const T = [['Разовое участие', '16 000 ₽ за закупку, засчитывается в вознаграждение при победе'], ['Пакет 7 закупок', '84 000 ₽ (по 12 000 ₽)'], ['Пакет 15 закупок', '105 000 ₽ (по 7 000 ₽)']];
-    A.modal({
-      title: 'Отправить договор', sub: esc(c.name), ok: 'Отправить договор',
-      body: `<div class="stack">${T.map((t, i) => `<label class="pick ${i === tariff ? 'on' : ''}" data-t="${i}"><input type="radio" name="tt" ${i === tariff ? 'checked' : ''} value="${i}"><div><div style="font-weight:750">${t[0]}</div><div class="faint" style="font-size:12px">${t[1]}</div></div></label>`).join('')}</div>
-        <div class="warn-line" style="margin:0">${ic('info')}<span>Во всех тарифах 2 % от суммы контракта при победе. Оплата за участие после итогового протокола, это не аванс.</span></div>
-        <span class="faint" style="font-size:12px">После отправки клиент станет жёлтым «не звонить» для всех, кроме вас.</span>`,
-      onMount: o => $$('input[name=tt]', o).forEach(r => r.onchange = () => { tariff = +r.value; $$('.pick', o).forEach(x => x.classList.toggle('on', +x.dataset.t === tariff)); }),
-      onOk: () => {
-        A.addHist(c, { type: 'send', out: 'contract', text: 'Отправлен договор: ' + T[tariff][0].toLowerCase() });
-        c.stage = 'contract_sent'; c.since = A.TODAY; if (!c.owner) c.owner = S.me;
-        c.dnc = `Договор отправлен ${dm(A.TODAY)}, владелец: ${person(c.owner).name}. Ждём подписи, с других пирожков не звонить.`;
-        c.next = { d: A.addDays(A.TODAY, 2), t: '11:00', text: 'Узнать, подписан ли договор' };
-        A.save(); A.render(); A.toast('Договор отправлен. Клиент помечен «не звонить» для коллег', 'file-signature');
-      },
     });
   }
   function nextStepModal(c) {
@@ -221,13 +212,13 @@
     const avgH = queue.length ? Math.round(queue.reduce((a, p) => a + A.ageOf(p.at).h, 0) / queue.length) : 0;
     const oldest = queue[0];
     const row = p => {
-      const c = co(p.co), ag = A.ageOf(p.at);
+      const c = co(p.co), ag = A.waitAge(p.at);
       const st = p.status === 'new' ? '<span class="badge acc">Новая</span>' : p.status === 'collecting' ? `<span class="badge stage" style="--sc:var(--st-4)"><span class="dot"></span>Собираю</span>` : '<span class="badge">Отправлена</span>';
       return `<div class="req" data-req-co="${c.id}" ${p.fresh ? 'style="background:var(--accent-soft)"' : ''}>
         <div style="min-width:0"><a href="#kompaniya-${c.id}" class="ell" style="font-weight:750;display:block">${esc(c.name)}</a><span class="faint" style="font-size:12px">${c.city} · ИНН <span class="mono">${c.inn}</span></span></div>
         <div class="prof-col" style="min-width:0;font-size:12.5px"><div class="ell">${esc(p.note)}</div><div class="faint ell">${(c.profile ? c.profile.licenses : c.licenses).join(', ') || 'Без лицензий'}</div></div>
         <div class="who-col row" style="gap:6px">${av(p.by, 'xs')}<span>${person(p.by).name}</span></div>
-        <div class="age-col">${p.status === 'sent' ? `<span class="faint" style="font-size:12px">${dm(p.sentAt.slice(0, 10))}, ${p.count} закупок</span>` : `<span class="age ${ag.hot ? 'hot' : ''}" data-tip="Запрос от ${dm(p.at.slice(0, 10))} ${p.at.slice(11, 16)}">${ic('clock')} ${ag.txt}</span>`}</div>
+        <div class="age-col">${p.status === 'sent' ? `<span class="faint" style="font-size:12px">${dm(p.sentAt.slice(0, 10))}, ${p.count} закупок</span>` : `<span class="age pod-timer ${ag.hot ? 'hot' : ''}" data-m="${ag.m}" data-tip="Запрос от ${dm(p.at.slice(0, 10))} ${p.at.slice(11, 16)}">${ic('clock')} ждёт ${ag.txt}</span>`}</div>
         <div class="act-col row" style="justify-content:flex-end;gap:6px"><span class="st-col">${st}</span>${p.status === 'new' ? `<button class="btn sm" data-collect="${p.id}">Беру</button>` : p.status === 'collecting' ? `<button class="btn sm primary" data-send="${p.id}">Отправлена</button>` : ''}</div></div>`;
     };
     const html = `
@@ -244,6 +235,7 @@
     return {
       html, mount: v => {
         $$('[data-pt]', v).forEach(b => b.onclick = () => { podTab = b.dataset.pt; A.render(); });
+        A.every(30000, () => A.render({ keepScroll: true }));
         $$('[data-collect]', v).forEach(b => b.onclick = () => { const p = S.pods.find(x => x.id === b.dataset.collect); p.status = 'collecting'; A.save(); A.render(); A.toast('Подборка в сборке. Менеджер видит статус', 'list-checks'); });
         $$('[data-send]', v).forEach(b => b.onclick = () => {
           const p = S.pods.find(x => x.id === b.dataset.send); p.status = 'sent'; p.sentAt = A.now().toISOString().slice(0, 19); p.count = 7; p.fresh = false;
@@ -318,10 +310,11 @@
     } else if (st.step === 3) {
       const d = dupes();
       const owners = Object.entries(d.byOwner).map(([w, n]) => `${n} у ${GEN[w] || person(w).name}`);
-      const head = `${d.newN} новых, ${d.total} уже есть: ${[...owners, d.refused ? d.refused + ' в отказе' : '', d.dnc ? d.dnc + ' в переговорах' : '', d.free ? d.free + ' свободны в базе' : ''].filter(Boolean).join(', ')}`;
+      const head = `${d.newN} новых (из них ${imp.large} крупных, не наша ЦА), ${d.total} уже есть: ${[...owners, d.refused ? d.refused + ' в отказе' : '', d.dnc ? d.dnc + ' в переговорах' : '', d.free ? d.free + ' свободны в базе' : ''].filter(Boolean).join(', ')}`;
       const kind = { refused: ['badge', 'В отказе'], dnc: ['badge dnc', 'Не звонить'], owned: ['badge acc', 'Закреплена'], free: ['badge', 'Свободна'] };
       body = `<div class="warn-line" style="margin-bottom:16px;font-size:13.5px">${ic('scan-search')}<span><b>${head}.</b> Проверка по ИНН, потом по телефону.</span></div>
-        <div class="dupe-sum"><div class="box ok"><div class="v">${d.newN}</div><div class="l">новых, загрузим</div></div><div class="box mid"><div class="v">${Object.values(d.byOwner).reduce((a, b) => a + b, 0)}</div><div class="l">закреплены за менеджерами</div></div><div class="box mid"><div class="v">${d.refused}</div><div class="l">в отказе, не звоним</div></div><div class="box mid"><div class="v">${d.dnc + d.free}</div><div class="l">в переговорах или свободны</div></div></div>
+        <div class="warn-line" id="imp-large" style="margin-bottom:16px;background:var(--surface-2)">${ic('building')}<span style="flex:1"><b>крупные, с тендерным отделом: ${imp.large} — не наша ЦА.</b> Наша ЦА: малые и средние компании и ИП, оборот около 30–100 млн ₽. По умолчанию крупных не берём.</span><label class="row" style="gap:6px;white-space:nowrap"><input type="checkbox" id="imp-take-large" ${st.large ? 'checked' : ''}> всё равно взять</label></div>
+        <div class="dupe-sum"><div class="box ok"><div class="v">${d.newN - (st.large ? 0 : imp.large)}</div><div class="l">новых, загрузим</div></div><div class="box mid"><div class="v">${Object.values(d.byOwner).reduce((a, b) => a + b, 0)}</div><div class="l">закреплены за менеджерами</div></div><div class="box mid"><div class="v">${d.refused}</div><div class="l">в отказе, не звоним</div></div><div class="box mid"><div class="v">${d.dnc + d.free}</div><div class="l">в переговорах или свободны</div></div></div>
         <section class="panel"><div class="panel-h"><h2>${ic('copy')}Уже есть в базе: ${d.total}</h2><span class="meta">не загружаем повторно, владелец не меняется</span></div>
           <div class="table-wrap"><table class="t"><thead><tr><th>Компания</th><th>ИНН</th><th>Статус</th><th>Что было</th></tr></thead><tbody>
           ${d.rows.map(({ c, k }) => { const last = c.history[0]; const [cls, nm] = kind[k]; return `<tr><td><a href="#kompaniya-${c.id}" style="font-weight:700">${esc(c.name)}</a></td><td class="mono">${c.inn}</td><td><span class="row" style="gap:6px"><span class="${cls}">${nm}</span>${c.owner ? av(c.owner, 'xs') : ''}</span></td>
@@ -332,22 +325,23 @@
       body = `<section class="panel"><div class="panel-b stack" style="gap:14px;max-width:560px">
         <div class="field"><label for="imp-pie">Пирожок</label><select class="input" id="imp-pie">${S.pies.map(p => `<option value="${p.id}" ${p.id === imp.pie ? 'selected' : ''}>${pieName(p)} · до ${dm(p.deadline)}</option>`).join('')}</select></div>
         <div class="field"><label for="imp-owner">Владелец новых компаний</label><select class="input" id="imp-owner"><option value="">Без владельца: закрепятся за тем, кто возьмёт пирожок</option>${D.MANAGERS.map(m => `<option value="${m.id}">${m.name} (закрепить на 7 дней)</option>`).join('')}</select></div>
-        <div class="warn-line" style="margin:0">${ic('info')}<span>Загрузим ${d.newN} новых компаний. ${d.total} дублей пропустим, их владельцы и история не изменятся.</span></div></div></section>`;
+        <div class="warn-line" style="margin:0">${ic('info')}<span>Загрузим ${d.newN - (st.large ? 0 : imp.large)} новых компаний.${st.large ? '' : ' Крупных (' + imp.large + ') пропускаем.'} ${d.total} дублей пропустим, их владельцы и история не изменятся.</span></div></div></section>`;
     }
     const html = `
     <div class="page-head"><div><h1>Импорт базы</h1><div class="sub">Excel или CSV из СБИС и Seldon. Дубли видны до загрузки, а не после звонка.</div></div></div>
     <div class="steps">${steps.map((n, i) => `<div class="step ${st.done || i + 1 < st.step ? 'done' : i + 1 === st.step ? 'on' : ''}"><span class="n">${st.done || i + 1 < st.step ? '✓' : i + 1}</span><span class="txt ell">${n}</span></div>`).join('')}</div>
     ${body}
-    ${!st.done && st.step > 1 ? `<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" id="imp-back">${ic('arrow-left')}Назад</button><button class="btn primary" id="imp-next">${st.step === 4 ? `${ic('download')}Загрузить ${dupes().newN} компаний` : `Дальше ${ic('arrow-right')}`}</button></div>` : ''}`;
+    ${!st.done && st.step > 1 ? `<div class="row" style="justify-content:space-between;margin-top:16px"><button class="btn" id="imp-back">${ic('arrow-left')}Назад</button><button class="btn primary" id="imp-next">${st.step === 4 ? `${ic('download')}Загрузить ${dupes().newN - (st.large ? 0 : imp.large)} компаний` : `Дальше ${ic('arrow-right')}`}</button></div>` : ''}`;
     return {
       html, mount: v => {
         const nx = () => { st.step++; A.save(); A.render(); };
         const s1 = $('#imp-sample', v); if (s1) s1.onclick = e => { e.preventDefault(); nx(); A.toast('Файл загружен: 100 строк', 'file-spreadsheet'); };
         const f = $('#imp-file', v); if (f) f.onchange = () => { nx(); A.toast('Файл загружен. В макете показываем пример из СБИС', 'file-spreadsheet'); };
         const dr = $('#drop', v); if (dr) { dr.ondragover = e => { e.preventDefault(); dr.classList.add('over'); }; dr.ondragleave = () => dr.classList.remove('over'); dr.ondrop = e => { e.preventDefault(); nx(); }; }
+        const tl = $('#imp-take-large', v); if (tl) tl.onchange = () => { st.large = tl.checked; A.save(); A.render({ keepScroll: true }); };
         const b = $('#imp-back', v); if (b) b.onclick = () => { st.step--; A.save(); A.render(); };
         const n = $('#imp-next', v); if (n) n.onclick = () => {
-          if (st.step === 4) { const d = dupes(); st.done = { n: d.newN, pie: $('#imp-pie', v).value }; A.save(); A.render(); A.toast(`Загружено ${d.newN} компаний, ${d.total} дублей пропущено`, 'check-check'); }
+          if (st.step === 4) { const d = dupes(); st.done = { n: d.newN - (st.large ? 0 : imp.large), pie: $('#imp-pie', v).value }; A.save(); A.render(); A.toast(`Загружено ${st.done.n} компаний, ${d.total} дублей пропущено`, 'check-check'); }
           else nx();
         };
         const ag = $('#imp-again', v); if (ag) ag.onclick = () => { S.imp = { step: 1 }; A.save(); A.render(); };
@@ -368,6 +362,18 @@
     ['Когда будет первая подборка?', 'Обычно 1–2 рабочих дня после того, как уточнили профиль: регионы, виды работ, допуски.'],
     ['Чем вы лучше бесплатного поиска закупок?', 'Мы не присылаем список. Отбираем закупки под ваш профиль, с авансом, и ведём участие до итога.'],
   ];
+  const GLOSS = [
+    ['Благоустройство', 'приведение территории в порядок: дорожки, площадки, озеленение, освещение двора.'],
+    ['Уборка снега', 'сезонный контракт: очистка и вывоз снега с дворов, дорог и площадок.'],
+    ['Чистка кровли', 'сброс снега и наледи с крыш, работа на высоте.'],
+    ['СМР', 'строительно-монтажные работы: само строительство и монтаж.'],
+    ['ПИР', 'проектно-изыскательские работы: проект и изыскания до начала стройки.'],
+    ['Генподряд', 'одна компания отвечает за объект целиком и сама нанимает остальных.'],
+    ['Субподряд', 'часть работ по договору с генподрядчиком, а не с заказчиком.'],
+    ['СРО', 'саморегулируемая организация; членство даёт допуск к строительству или проектированию.'],
+    ['НМЦК', 'начальная (максимальная) цена контракта: от неё идут торги.'],
+    ['Обеспечение заявки', 'деньги, которые участник блокирует на время торгов; после торгов возвращаются.'],
+  ];
   A.cheatBody = function (compact) {
     return `<div class="say"><div class="eyebrow" style="color:var(--accent-text)">Первый звонок: говорим только это</div><div class="q">«Работаем за 2 % после победы»</div><p class="muted" style="margin-top:6px;font-size:12.5px">Тарифы и пакеты обсуждаем, только когда клиент заинтересовался и спросил.</p></div>
       <section class="panel"><div class="panel-h"><h3>${ic('receipt')}Условия</h3></div>
@@ -376,9 +382,15 @@
         <div class="price-row"><div><b>Пакет 15 закупок</b><div class="d">по 7 000 ₽ за закупку</div></div><span class="v">105 000 ₽</span></div>
         <div class="price-row"><div><b>При победе</b><div class="d">от суммы контракта</div></div><span class="v">2 %</span></div>
         <div class="price-row" style="background:var(--surface-2)"><div><b>Когда платят</b><div class="d">после итогового протокола. Это не аванс</div></div><span class="v">${ic('check')}</span></div></section>
+      <section class="panel" id="materials"><div class="panel-h"><h3>${ic('paperclip')}Материалы</h3></div>
+        <div class="price-row"><div><b>Презентация</b><div class="d"><span class="badge acc">проверено на телефоне</span> открывается без приложений</div></div><button class="btn sm" data-mat="Презентация">${ic('eye')}Открыть</button></div>
+        <div class="price-row"><div><b>Условия</b><div class="d">тарифы и порядок оплаты одной страницей</div></div><button class="btn sm" data-mat="Условия">${ic('eye')}Открыть</button></div>
+        <div class="price-row"><div><b>Пример подборки</b><div class="d">как выглядит список закупок для клиента</div></div><button class="btn sm" data-mat="Пример подборки">${ic('eye')}Открыть</button></div></section>
       <div class="warn-line" style="margin:0">${ic('circle-help')}<span><b>Не знаете ответа?</b> Скажите «уточню и перезвоню», откройте карточку клиента и задайте вопрос Павлу в блоке «Вопросы специалисту». Не пишите в общий чат: там вопрос потеряется.</span></div>
       <section class="panel"><div class="panel-h"><h3>${ic('messages-square')}Частые вопросы</h3><span class="meta num">${FAQ.length}</span></div>
-        ${FAQ.map(([q, a], i) => `<details class="faq" ${!compact && i < 2 ? 'open' : ''}><summary>${esc(q)}${ic('chevron-down')}</summary><div class="ans">${a}</div></details>`).join('')}</section>`;
+        ${FAQ.map(([q, a], i) => `<details class="faq" ${!compact && i < 2 ? 'open' : ''}><summary>${esc(q)}${ic('chevron-down')}</summary><div class="ans">${a}</div></details>`).join('')}</section>
+      <section class="panel" id="glossary"><div class="panel-h"><h3>${ic('book-a')}Словарь</h3><span class="meta num">${GLOSS.length}</span></div>
+        ${GLOSS.map(([t, d]) => `<div class="price-row gl-row"><div><b>${t}</b><div class="d">${d}</div></div></div>`).join('')}</section>`;
   };
   A.screens.shpargalka = function () {
     return {

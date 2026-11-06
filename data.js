@@ -61,6 +61,25 @@
     ['k14', 'ООО «Свежий воздух КЗН»', 'kzn-vent', 'refused', 'elya', '2026-10-24', null, { refusal: 'Не работают с госзаказом', works: ['Вентиляция'] }],
     ['k15', 'ООО «Термовент»', 'kzn-vent', 'refused', 'irina', '2026-10-29', null, { refusal: 'Малый объём, неинтересно', works: ['Вентиляция', 'Отопление'] }],
     ['k16', 'ООО «Климатика Плюс»', 'kzn-vent', 'refused', 'anastasia', '2026-11-02', null, { refusal: 'Только частные объекты', works: ['Кондиционирование'] }],
+    ['k17', 'ООО «Вент-Профи Казань»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
+    ['k18', 'ООО «ПромКлимат Волга»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k19', 'ООО «Идель-Вентиляция»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k20', 'ООО «Татарстан Холод Сервис»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
+    ['k21', 'ООО «Энергоклимат КЗН»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k22', 'ООО «Воздух и Тепло»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k23', 'ООО «КазаньСпецМонтаж»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
+    ['k24', 'ООО «Аэродинамика»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k25', 'ООО «Атмосфера-Сервис»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k26', 'ООО «ВентСнаб Поволжье»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
+    ['k27', 'ООО «Кама-Холод»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k28', 'ООО «Чистый воздух 116»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k29', 'ООО «Мастер Климата»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
+    ['k30', 'ООО «ТеплоВент»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k31', 'ООО «Оптима Вент»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k32', 'ООО «Волга-Аэро»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
+    ['k33', 'ООО «Казанский монтажник»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k34', 'ООО «Клима Тех»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
+    ['k35', 'ООО «ИнжСтрой Вент»', 'kzn-vent', 'base', null, null, null, { works: ['Вентиляция', 'Кондиционирование'] }],
 
     // Рязань, кровля (пирожок горит)
     ['r01', 'ООО «Окский кровельный центр»', 'rzn-roof', 'interest', 'irina', '2026-10-30', null, { works: ['Кровля', 'Фасады'] }],
@@ -99,7 +118,7 @@
     ['n06', 'ООО «Вольт-Строй»', 'nsk-el', 'wait_pod', 'vitaliy', '2026-11-01', ['2026-11-05', '12:00', 'Узнать у Павла про подборку'], { works: ['Электромонтаж'] }],
 
     // Тюмень, вентиляция
-    ['t01', 'ООО «Тура-Вент»', 'tmn-vent', 'interest', 'ilyana', '2026-11-04', ['2026-11-05', '15:00', 'Отправить пирожок по Тюмени'], { works: ['Вентиляция'] }],
+    ['t01', 'ООО «Тура-Вент»', 'tmn-vent', 'interest', 'sergey', '2026-11-04', ['2026-11-05', '15:00', 'Отправить пирожок по Тюмени'], { works: ['Вентиляция'] }],
     ['t02', 'ООО «ТюменьКлимат»', 'tmn-vent', 'signed', 'ilyana', '2026-10-28', ['2026-11-06', '10:00', 'Помочь с аккредитацией'], { works: ['Вентиляция', 'Кондиционирование'], licenses: ['СРО строителей'] }],
     ['t03', 'ООО «Западно-Сибирская вентиляция»', 'tmn-vent', 'interest', 'sergey', '2026-11-04', ['2026-11-05', '11:00', 'Перезвонить: обещали решить до обеда'], { works: ['Вентиляция'] }],
     ['t04', 'ООО «Вент-Альянс 72»', 'tmn-vent', 'base', null, null, null, { works: ['Вентиляция'] }],
@@ -163,6 +182,9 @@
       contact, works: x.works || [p.work], licenses: x.licenses || [],
       dnc: x.dnc || null, refusal: x.refusal || null, lockUntil: x.lockUntil || null, won: !!x.won,
       profile: null, history: hist(id, stage, owner, since, pie), questions: [],
+      email: h % 4 === 0 ? '' : 'zakupki@' + id + '.example', ogrn: h % 3 === 0 ? '' : '10000' + String(10000000 + (h % 89999999)).slice(0, 8),
+      address: p.city + ', ул. Заводская, д. ' + (1 + h % 90), director: contact.role === 'директор' ? contact.name : '',
+      turnover: 30 + (h >> 2) % 71, badPhone: null, waitReply: null,
     };
     if (['profile', 'wait_pod', 'pod_sent', 'contract_sent', 'signed', 'accred', 'participation', 'result'].includes(stage)) {
       c.profile = { regions: [p.city === 'Санкт-Петербург' ? 'Санкт-Петербург и Ленобласть' : p.city + ' и область'], works: c.works, licenses: c.licenses.length ? c.licenses : ['Нет'], min: '3 млн ₽', advance: 'Только с авансом' };
@@ -191,6 +213,13 @@
   by('r01').history.unshift({ d: '2026-10-30', t: '14:45', who: 'irina', type: 'call', out: 'interest', text: 'Интересно, но «позвоните после праздников». Следующий шаг не поставлен' });
   by('k10').history.unshift({ d: '2026-11-04', t: '16:05', who: 'sergey', type: 'call', out: 'callback', text: 'Секретарь: директор будет завтра после обеда' });
 
+  // клиенты замолчали после «Интересно» (порог — App.SILENCE_H)
+  ['t03', 't01'].forEach(id => {
+    const c = by(id);
+    c.history.unshift({ d: '2026-11-04', t: '15:00', who: 'sergey', type: 'call', out: 'interest', text: 'Интересно. Отправил условия в WhatsApp, ответа нет' });
+    c.waitReply = '2026-11-04T15:00';
+  });
+
   // отправленные пирожки
   COMPANIES.forEach(c => {
     if (['pie_sent', 'profile', 'wait_pod', 'pod_sent', 'contract_sent', 'signed', 'accred', 'participation', 'result'].includes(c.stage)) {
@@ -208,7 +237,7 @@
     { id: 'pd3', co: 's02', by: 'elya', at: '2026-11-04T17:05', status: 'new', note: 'Металлоконструкции, СПб и Ленобласть, от 5 млн' },
     { id: 'pd4', co: 'n06', by: 'vitaliy', at: '2026-11-01T12:10', status: 'collecting', note: 'Электромонтаж, Новосибирск, без СРО' },
     { id: 'pd5', co: 'n03', by: 'sergey', at: '2026-11-03T10:30', status: 'new', note: 'Электрика и слаботочка, НСО, до 15 млн' },
-    { id: 'pd6', co: 'q01', by: 'anastasia', at: '2026-11-04T09:50', status: 'new', note: 'Кровля, Татарстан, с авансом' },
+    { id: 'pd6', co: 'q01', by: 'anastasia', at: '2026-11-05T09:30', status: 'new', note: 'Кровля, Татарстан, с авансом' },
     { id: 'pd7', co: 'u01', by: 'irina', at: '2026-10-27T10:00', status: 'sent', sentAt: '2026-10-29T16:00', count: 6, note: 'Пожарная безопасность, Бурятия' },
     { id: 'pd8', co: 'q02', by: 'anastasia', at: '2026-11-01T11:00', status: 'sent', sentAt: '2026-11-03T12:30', count: 8, note: 'Кровля и фасады, Казань' },
   ];
@@ -228,7 +257,8 @@
   // утренние звонки (05.11 до 10:00) — база для колонки «сегодня»
   const TODAY_BASE = { maxim: [3, 1, 0, 0], irina: [2, 1, 0, 0], elya: [4, 2, 1, 0], sergey: [0, 0, 0, 0], ilyana: [1, 0, 0, 0], anastasia: [2, 1, 0, 0], vitaliy: [1, 1, 0, 0] };
 
-  const IMPORT = { file: 'СБИС_Казань_вентиляция_ноябрь.xlsx', rows: 100, pie: 'kzn-vent' };
+  const IMPORT = { file: 'СБИС_Казань_вентиляция_ноябрь.xlsx', rows: 119, large: 6, pie: 'kzn-vent' };
 
-  window.DEMO = { MANAGERS, SPECIALIST, STAGES, PIES, COMPANIES, PODBORKI, LEADS, YESTERDAY, TODAY_BASE, IMPORT, NOW: '2026-11-05T10:05' };
+  const DAY_PLAN = { pie: 'kzn-vent' };
+  window.DEMO = { DAY_PLAN, MANAGERS, SPECIALIST, STAGES, PIES, COMPANIES, PODBORKI, LEADS, YESTERDAY, TODAY_BASE, IMPORT, NOW: '2026-11-05T10:05' };
 })();
