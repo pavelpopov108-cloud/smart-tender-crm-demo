@@ -284,7 +284,7 @@
   /* ---------- 9. Импорт базы ---------- */
   const COLS_IN = [['Наименование', 'ООО «Аэровент Поволжье»', 'name'], ['ИНН', '0068…', 'inn'], ['Телефон', '+7 (900) 000-…', 'phone'], ['Регион', 'Республика Татарстан', 'city'], ['ОКВЭД основной', '43.22 Монтаж систем вентиляции', 'works'], ['Электронная почта', 'info@…', 'email'], ['Выручка за 2025', '48 200 000', 'skip']];
   const FIELDS = [['name', 'Название'], ['inn', 'ИНН (ключ дублей)'], ['phone', 'Телефон (доп. ключ)'], ['city', 'Город'], ['works', 'Вид работ'], ['email', 'Почта'], ['skip', 'Не загружать']];
-  const GEN = { sergey: 'Сергея', maxim: 'Максима', anastasia: 'Анастасии', irina: 'Ирины', nikolay: 'Николая', elyana: 'Эляны', vitaliy: 'Виталия' };
+  const GEN = { sergey: 'Сергея', maxim: 'Максима', anastasia: 'Анастасии', irina: 'Ирины', nikolay: 'Николая', elyana: 'Эляны', vitaliy: 'Виталия', chulpan: 'Чулпан', zamit: 'Замита' };
   function dupes() {
     const S = A.S; const imp = D.IMPORT;
     const found = S.cos.filter(c => c.pie === imp.pie);

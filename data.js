@@ -9,6 +9,8 @@
     { id: 'elyana', name: 'Эляна', ini: 'Эл', color: '#b0703f' },
     { id: 'anastasia', name: 'Анастасия', ini: 'Ан', color: '#5b8f4e' },
     { id: 'vitaliy', name: 'Виталий', ini: 'Ви', color: '#6b7f95' },
+    { id: 'chulpan', name: 'Чулпан', ini: 'Чу', color: '#3f7f96' },
+    { id: 'zamit', name: 'Замит', ini: 'За', color: '#8a6a4f' },
   ];
   const SPECIALIST = { id: 'pavel', name: 'Павел', ini: 'Па', color: '#3d4a55', role: 'тендерный специалист' };
 
@@ -252,10 +254,10 @@
 
   const YESTERDAY = {
     maxim: [48, 19, 4, 1], irina: [41, 17, 3, 0], nikolay: [52, 22, 5, 1], sergey: [37, 14, 2, 0],
-    elyana: [29, 11, 2, 1], anastasia: [44, 16, 3, 0], vitaliy: [33, 12, 1, 1],
+    elyana: [29, 11, 2, 1], anastasia: [44, 16, 3, 0], vitaliy: [33, 12, 1, 1], chulpan: [31, 12, 2, 0], zamit: [27, 10, 1, 0],
   };
   // утренние звонки (05.11 до 10:00) — база для колонки «сегодня»
-  const TODAY_BASE = { maxim: [3, 1, 0, 0], irina: [2, 1, 0, 0], nikolay: [4, 2, 1, 0], sergey: [0, 0, 0, 0], elyana: [1, 0, 0, 0], anastasia: [2, 1, 0, 0], vitaliy: [1, 1, 0, 0] };
+  const TODAY_BASE = { maxim: [3, 1, 0, 0], irina: [2, 1, 0, 0], nikolay: [4, 2, 1, 0], sergey: [0, 0, 0, 0], elyana: [1, 0, 0, 0], anastasia: [2, 1, 0, 0], vitaliy: [1, 1, 0, 0], chulpan: [2, 1, 0, 0], zamit: [1, 0, 0, 0] };
 
   const IMPORT = { file: 'СБИС_Казань_вентиляция_ноябрь.xlsx', rows: 119, large: 6, pie: 'kzn-vent' };
 
