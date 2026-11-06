@@ -2,7 +2,7 @@
 (function () {
   const A = window.App, { $, ic } = A;
   const TOUR = [
-    { route: 'planerka', sel: '#kpi-wait', title: 'Планёрка в 10:00', short: 'Цифры команды собраны сами',
+    { route: 'planerka', sel: '#fn-wait_pod', title: 'Планёрка в 10:00', short: 'Цифры команды собраны сами',
       text: 'Цифры собраны из исходов звонков, отчёт никто не заполнял. Сейчас подборку ждут 6 клиентов. Запомните это число.' },
     { route: 'pirozhki', sel: '[data-pie="kzn-vent"]', title: 'Сергей выбирает пирожок', short: '«Казань, вентиляция»: срок, аванс, кто взял',
       text: '«Казань, вентиляция»: 18,4 млн ₽, аванс 30 %, до подачи 5 дней, никто не взял. Сергей нажимает «Беру».',
@@ -19,12 +19,12 @@
       text: '«Аэровент Поволжье» заинтересовался. Сергей жмёт «Интересно» и ставит следующий шаг на завтра 10:00. Без шага сделка покраснела бы.',
       before: () => A.setPendingOut('interest'),
       act: () => { A.resetDialUi(); A.recordOutcome('kzn-vent', 'k01', 'interest', { d: A.addDays(A.TODAY, 1), t: '10:00', nextText: 'Отправить подборку и договор' }); } },
-    { route: 'kompaniya-k01', sel: '#btn-podborka', title: 'Запрос подборки', short: 'Профиль клиента уходит Павлу',
+    { route: 'kompaniya-k01', sel: '#btn-send', title: 'Запрос подборки', short: 'Профиль клиента уходит Павлу',
       text: 'В карточке вся история и следующий шаг. Сергей запрашивает подборку: профиль клиента уходит Павлу, этап меняется сам.',
       act: () => A.requestPodborka(A.co('k01'), 'Вентиляция, Казань и Татарстан, только с авансом') },
     { route: 'podborki', sel: '[data-req-co="k01"]', title: 'Павел видит запрос', short: 'Очередь подборок в одном месте',
       text: 'Запрос встал в очередь Павла с профилем и временем ожидания. Искать его в общем чате не нужно.' },
-    { route: 'planerka', sel: '#kpi-wait', title: 'Утром на планёрке', short: 'Цифра изменилась сама',
+    { route: 'planerka', sel: '#fn-wait_pod', title: 'Утром на планёрке', short: 'Цифра изменилась сама',
       text: '«Ждут подборку» теперь 7, а у Сергея в таблице «Сегодня» 2 новых звонка и 1 интересный. Никто ничего не считал руками.',
       before: () => A.setTableMode('today'), ring2: '#tr-sergey' },
   ];
@@ -70,7 +70,7 @@
         const r = el.getBoundingClientRect(); const mob = window.innerWidth <= 760;
         const target = window.scrollY + r.top - (mob ? 72 : Math.max(80, (window.innerHeight - r.height) / 2 - 80));
         window.scrollTo({ top: Math.max(0, target), behavior: 'instant' in window ? 'instant' : 'auto' });
-        const kpi = el.classList.contains('kpi') ? el : null; if (kpi && i === TOUR.length - 1) { kpi.classList.add('flash'); }
+        if (i === TOUR.length - 1) el.classList.add('flash');
       }
       setTimeout(place, 60);
     }, 420);

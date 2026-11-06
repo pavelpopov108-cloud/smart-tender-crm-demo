@@ -20,15 +20,7 @@
     const d = A.now();
     const html = `
     <div class="page-head">
-      <div><h1>Планёрка 10:00</h1><div class="sub">${A.WD[d.getDay()][0].toUpperCase() + A.WD[d.getDay()].slice(1)}, ${d.getDate()} ${A.MON[d.getMonth()]}. Цифры собраны из исходов звонков, отчёт никто не заполнял.</div></div>
-      <div class="actions"><a class="btn" href="#klienty">${ic('square-kanban')}Все клиенты</a><a class="btn primary" href="#moy-den">${ic('sun')}Мой день</a></div>
-    </div>
-    <div class="panel kpis">
-      <div class="kpi"><div class="lbl">${ic('phone')}Звонков вчера</div><div class="val">${ySum(0)}</div><div class="delta">дозвон ${Math.round(ySum(1) / ySum(0) * 100)} %, интересных ${ySum(2)}</div></div>
-      <div class="kpi"><div class="lbl">${ic('users')}Клиентов в работе</div><div class="val" id="kpi-active">${c.active}</div><div class="delta">от интереса до итога</div></div>
-      <div class="kpi" id="kpi-wait"><div class="lbl">${ic('hourglass')}Ждут подборку</div><div class="val">${c.wait}</div><div class="delta">в очереди у Павла: ${c.podQueue}</div></div>
-      <div class="kpi"><div class="lbl">${ic('file-signature')}Договор отправлен</div><div class="val">${c.contract}</div><div class="delta" style="${hot.contracts.length ? 'color:var(--hot-text)' : ''}">без ответа больше 2 дней: ${hot.contracts.length}</div></div>
-      <div class="kpi"><div class="lbl">${ic('badge-check')}Подписано</div><div class="val">${c.signed}</div><div class="delta">включая аккредитацию и участие</div></div>
+      <div><h1>Планёрка 10:00</h1><div class="sub">${A.WD[d.getDay()][0].toUpperCase() + A.WD[d.getDay()].slice(1)}, ${d.getDate()} ${A.MON[d.getMonth()]} · вчера <b class="num">${ySum(0)}</b> звонков, дозвон ${Math.round(ySum(1) / ySum(0) * 100)} %, интересных ${ySum(2)}</div></div>
     </div>
     <div class="grid g-main">
       <div class="stack" style="gap:16px">
@@ -115,8 +107,7 @@
     <div class="page-head"><div><h1>Мой день</h1><div class="sub">${p.name}: ${todayList.length} ${A.plural(todayList.length, 'дело', 'дела', 'дел')} на сегодня, ${mine.filter(c => A.ACTIVE.includes(c.stage)).length} клиентов в работе</div></div></div>
     <div class="hero-call day-plan" id="start-call">
       <div style="flex:1;min-width:220px"><div class="eyebrow">Обзвон на сегодня</div><div class="big" id="day-plan-title">Обзвон на сегодня: ${planN} ${A.plural(planN, 'компания', 'компании', 'компаний')}</div>
-        <div class="muted">Уже загружены, с ИНН. Пирожок «${pieName(planPie)}», подача до ${dm(planPie.deadline)}, осталось ${A.countdown(planPie).txt}</div>
-        <div class="plan-inn">${planList.slice(0, 4).map(c => `<span class="tag"><span class="mono">${c.inn}</span> ${esc(c.name.replace(/^ООО /, ''))}</span>`).join('')}${planN > 4 ? `<span class="faint" style="font-size:12px">и ещё ${planN - 4}</span>` : ''}</div></div>
+        <div class="muted">Уже загружены, с ИНН. Пирожок «${pieName(planPie)}», подача до ${dm(planPie.deadline)}, осталось ${A.countdown(planPie).txt}</div></div>
       <button class="btn primary lg" id="plan-start">${ic('phone-call')}Начать</button>
     </div>
     ${silent.length ? `<section class="panel" id="remind-panel" style="margin-bottom:16px"><div class="panel-h"><h2>${ic('bell-ring')}Напомнить о себе</h2><span class="meta num">${silent.length}</span></div><div class="list">${silent.map(({ c, h }) => `<a class="li" href="#kompaniya-${c.id}"><span class="hot-dot"></span><div class="stack" style="gap:1px;min-width:0"><span class="title ell">${esc(c.name)}</span><span class="sub">Интересно, ответа нет ${A.silentTxt(h)} · ${c.city}</span></div><span class="end"><span class="btn sm">Написать</span></span></a>`).join('')}</div></section>` : ''}
@@ -130,9 +121,8 @@
         <section class="panel"><div class="panel-h"><h2>${ic('users')}Мои клиенты по этапам</h2><span class="meta"><a class="btn sm ghost" href="#klienty">Канбан ${ic('arrow-right')}</a></span></div>
           <div class="panel-b">${myByStage.length ? `<div class="stage-strip">${myByStage.map(([s, n]) => `<a class="stage-cell" href="#klienty"><div class="n">${n}</div><div class="l"><span class="badge stage" style="--sc:var(--st-${A.stage(s).c});padding:0;border:0;background:none;height:auto"><span class="dot"></span></span>${A.stage(s).name}</div></a>`).join('')}</div>`
             : `<div class="empty" style="padding:16px"><b>Пока нет клиентов</b><span>Отметьте «Интересно» в обзвоне, и клиент появится здесь.</span></div>`}</div></section>
-        <section class="panel"><div class="panel-h"><h2>${ic('croissant')}Мои пирожки</h2><span class="meta"><a class="btn sm ghost" href="#pirozhki">Все ${ic('arrow-right')}</a></span></div>
-          ${myPies.length ? `<div class="list">${myPies.map(x => { const cd = A.countdown(x); return `<a class="li" href="#obzvon-${x.id}"><div class="stack" style="gap:1px"><span class="title">${pieName(x)}</span><span class="sub">${money(x.amount, true)}${x.advance ? ', аванс ' + x.advance + ' %' : ''} · закреплён до ${dm(x.takenUntil)}</span></div><span class="end"><span class="countdown ${cd.hot ? 'hot' : ''}">${ic('timer')}${cd.txt}</span></span></a>`; }).join('')}</div>`
-            : `<div class="empty" style="padding:22px"><div class="ico">${ic('croissant')}</div><b>Нет пирожков</b><span>Возьмите свободный на доске «Пирожки».</span><a class="btn sm" href="#pirozhki">Открыть доску</a></div>`}</section>
+        ${myPies.length > 1 ? `<section class="panel"><div class="panel-h"><h2>${ic('croissant')}Мои пирожки</h2><span class="meta"><a class="btn sm ghost" href="#pirozhki">Все ${ic('arrow-right')}</a></span></div>
+          <div class="list">${myPies.map(x => { const cd = A.countdown(x); return `<a class="li" href="#obzvon-${x.id}"><div class="stack" style="gap:1px"><span class="title">${pieName(x)}</span><span class="sub">${money(x.amount, true)}${x.advance ? ', аванс ' + x.advance + ' %' : ''} · закреплён до ${dm(x.takenUntil)}</span></div><span class="end"><span class="countdown ${cd.hot ? 'hot' : ''}">${ic('timer')}${cd.txt}</span></span></a>`; }).join('')}</div></section>` : ''}
       </div>
     </div>`;
     return { html, mount: v => { $('#plan-start', v).onclick = () => { if (!planPie.takenBy) { const n = A.takePie(planPie.id); A.toast(`Пирожок ваш до ${dm(planPie.takenUntil)}. Закреплено ${n} компаний`, 'hand'); } location.hash = '#obzvon-' + planPie.id; }; } };
@@ -164,14 +154,14 @@
       const cd = A.countdown(p), st = pieStats(p), mine = p.takenBy === S.me;
       return `<article class="pie ${cd.hot ? 'hot' : ''} ${mine ? 'mine' : ''}" data-pie="${p.id}">
         <div class="pie-top"><div style="flex:1;min-width:0"><div class="pie-city">${p.city}</div><div class="pie-work">${p.work} · ${p.law}</div></div>
-          ${p.takenBy ? `<span class="row" style="gap:6px">${av(p.takenBy)}<span class="faint" style="font-size:12px">до ${dm(p.takenUntil)}</span></span>` : '<span class="badge acc">Свободен</span>'}</div>
+          ${p.takenBy ? `<span class="row" style="gap:6px" data-tip="Компании закреплены до ${dm(p.takenUntil)}">${av(p.takenBy)}<span class="faint" style="font-size:12px">до ${dm(p.takenUntil)}</span></span>` : '<span class="badge acc">Свободен</span>'}</div>
         <p class="pie-title">${esc(p.title)}</p>
         ${A.urgent(p) ? `<div class="hot-note" data-hot-note>${ic('flame')}<span>Срок близко: предлагай сотрудничество, а не этот тендер</span></div>` : ''}
         <div class="pie-money"><div><div class="l">Сумма</div><div class="v">${money(p.amount, true)}</div></div><div><div class="l">Аванс</div><div class="v">${p.advance ? p.advance + ' %' : '<span class="faint">нет</span>'}</div></div>
           <div><div class="l">Подача</div><div class="v ${cd.hot ? 'hot' : ''}" data-tip="до ${dm(p.deadline)} ${p.deadline.slice(11)}">${cd.txt}</div></div></div>
         <div class="stack" style="gap:6px"><div class="row" style="justify-content:space-between;font-size:12.5px"><span class="muted">Обзвонено</span><span class="num">${st.called} из ${st.total}</span></div><div class="prog"><i style="width:${st.called / st.total * 100}%"></i></div></div>
         <div class="pie-foot">${mine ? `<a class="btn primary" href="#obzvon-${p.id}" style="flex:1">${ic('phone-call')}В обзвон</a>`
-          : p.takenBy ? `<span class="muted" style="flex:1;font-size:12.5px">Владелец: ${person(p.takenBy).name}. Компании пирожка закреплены.</span><button class="btn sm" data-ask="${p.id}">Попросить</button>`
+          : p.takenBy ? `<span class="muted" style="flex:1;font-size:12.5px">Взял ${person(p.takenBy).name}</span><button class="btn sm" data-ask="${p.id}">Попросить</button>`
             : `<button class="btn primary" data-take="${p.id}" style="flex:1">${ic('hand')}Беру</button><span class="faint" style="font-size:12px">${st.total} компаний</span>`}</div>
       </article>`;
     };
@@ -293,7 +283,7 @@
           <div class="panel-b">${c.history.length ? feed(c.history.slice(0, 8)) : `<div class="empty" style="padding:18px"><div class="ico">${ic('phone')}</div><b>Звонков ещё не было</b><span>Вы первый. Исход появится здесь и у всех коллег.</span></div>`}</div></section>
       </div>
       <div class="stack" style="gap:16px">
-        <section class="panel" id="outcomes-panel"><div class="panel-h"><h3>${ic('mouse-pointer-click')}Исход звонка</h3><span class="meta hide-mob">клавиши 1–${OUT.length}</span></div>
+        <section class="panel" id="outcomes-panel"><div class="panel-h"><h3 data-tip="Можно нажимать клавиши 1–${OUT.length}">${ic('mouse-pointer-click')}Исход звонка</h3></div>
           <div class="panel-b">
             ${blocked ? `<div class="empty" style="padding:18px 8px"><div class="ico">${ic('lock')}</div><b>${notMine && !c.dnc ? (p.takenBy ? 'Пирожок у коллеги' : 'Сначала возьмите пирожок') : c.dnc ? 'Звонить нельзя' : 'Компания закреплена за коллегой'}</b><span>${notMine && !c.dnc ? 'Исходы откроются, когда пирожок будет вашим.' : 'Исходы недоступны. Пропустите компанию.'}</span><button class="btn primary" data-skip id="skip-btn">${ic('skip-forward')}Пропустить</button></div>`
               : `<div class="outcomes" id="outcomes">${OUT.map((o, i) => `<button class="oc ${o.good ? 'good' : ''} ${pendingOut === o.k ? 'sel' : ''}" data-out="${o.k}">${ic(o.i)}${o.n}<span class="k">${i + 1}</span></button>`).join('')}</div>
@@ -301,8 +291,8 @@
               <div class="field" style="margin-top:12px"><label for="dial-note">Заметка (необязательно)</label><input class="input" id="dial-note" placeholder="Например: директор Тимур, просил на почту" value="${esc(S._note || '')}"></div>
               <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn ghost" data-skip>${ic('skip-forward')}Пропустить</button>${pendingOut ? `<button class="btn primary" id="save-out">Записать и дальше ${ic('arrow-right')}</button>` : '<span class="faint" style="font-size:12px">Простые исходы записываются сразу</span>'}</div>`}
           </div></section>
-        <section class="panel queue-list hide-mob"><div class="panel-h"><h3>${ic('list-ordered')}Очередь</h3><span class="meta num">${list.length}</span></div>
-          <div class="list">${list.map((x, i) => `<div class="li ${x === c ? 'cur' : ''} ${ds.done[x.id] ? 'done' : ''}"><span class="qn">${i + 1}</span><span class="ell" style="flex:1;font-weight:${x === c ? 750 : 600}">${esc(x.name)}</span>${x.dnc ? '<span class="badge dnc">Не звонить</span>' : ''}${ds.done[x.id] ? `<span class="faint" style="font-size:12px">${ds.done[x.id] === 'skip' ? 'пропущена' : outName(ds.done[x.id]).toLowerCase()}</span>` : (x.owner && x.owner !== S.me && !x.dnc ? av(x.owner, 'xs') : '')}</div>`).join('')}</div></section>
+        <section class="panel queue-list hide-mob"><div class="panel-h"><h3>${ic('list-ordered')}Дальше в очереди</h3><span class="meta num">${list.length}</span></div>
+          <div class="list">${list.map((x, i) => [x, i]).slice(Math.max(0, list.indexOf(c)), Math.max(0, list.indexOf(c)) + 4).map(([x, i]) => `<div class="li ${x === c ? 'cur' : ''} ${ds.done[x.id] ? 'done' : ''}"><span class="qn">${i + 1}</span><span class="ell" style="flex:1;font-weight:${x === c ? 750 : 600}">${esc(x.name)}</span>${x.dnc ? '<span class="badge dnc">Не звонить</span>' : ''}${ds.done[x.id] ? `<span class="faint" style="font-size:12px">${ds.done[x.id] === 'skip' ? 'пропущена' : outName(ds.done[x.id]).toLowerCase()}</span>` : (x.owner && x.owner !== S.me && !x.dnc ? av(x.owner, 'xs') : '')}</div>`).join('')}${list.length - Math.max(0, list.indexOf(c)) - 4 > 0 ? `<div class="li faint" style="font-size:12.5px">и ещё ${list.length - Math.max(0, list.indexOf(c)) - 4}</div>` : ''}</div></section>
       </div>
     </div>`;
     return {

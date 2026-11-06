@@ -383,7 +383,7 @@ textarea.input { height: auto; padding: 9px 11px; resize: vertical; min-height: 
 /* карточка компании */
 .card-head { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; padding: 18px 20px; }
 .card-head .ttl { flex: 1; min-width: 240px; }
-.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border); }
+.facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 2fr); border-top: 1px solid var(--border); }
 .fact { padding: 11px 20px; border-right: 1px solid var(--border); min-width: 0; }
 .fact:last-child { border-right: 0; }
 .fact .l { font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
@@ -729,3 +729,10 @@ details.faq .ans b { color: var(--text); }
 .dz-close { position: fixed; top: 14px; right: 14px; z-index: 2; }
 @media (max-width: 1100px) { .dz-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .dz-shots { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .dz-shot.tall { grid-column: 1 / -1; max-width: 220px; justify-self: center; } .dz-card { padding: 14px; } }
+
+/* 06.11 упрощение: шпаргалка вкладками */
+.cheat-tabs { align-self: flex-start; flex-wrap: wrap; }
+[data-pane][hidden] { display: none !important; }
+.cheat-one { max-width: 820px; }
+.drawer-b .cheat-tabs { margin: 12px 0; }
+#umenu { max-height: calc(100vh - 90px); overflow-y: auto; overscroll-behavior: contain; }

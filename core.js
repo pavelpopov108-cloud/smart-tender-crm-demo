@@ -133,9 +133,9 @@
     { id: 'podborki', name: 'Подборки', icon: 'list-checks', group: 'Работа', cnt: () => counts().podQueue },
     { id: 'vhodyashchie', name: 'Входящие', icon: 'inbox', group: 'Работа', cnt: () => counts().leads, hot: true },
     { id: 'import', name: 'Импорт базы', icon: 'file-up', group: 'Сервис' },
-    { id: 'shpargalka', name: 'Шпаргалка', icon: 'book-open', group: 'Сервис' },
-    { id: 'pochemu', name: 'Почему так', icon: 'lightbulb', group: 'О макете' },
-    { id: 'tur', name: 'Тур', icon: 'play', group: 'О макете' },
+    { id: 'shpargalka', name: 'Шпаргалка', icon: 'book-open', group: 'Сервис', hidden: true },
+    { id: 'pochemu', name: 'Почему так', icon: 'lightbulb', group: 'О макете', hidden: true },
+    { id: 'tur', name: 'Тур', icon: 'play', group: 'О макете', hidden: true },
   ];
   function parseHash() {
     const h = (location.hash || '').slice(1);
@@ -163,7 +163,6 @@
           <div class="crumbs" id="crumbs"></div>
           <button class="search-btn" id="search-btn" aria-label="Поиск">${ic('search')}<span class="txt">Компания, ИНН, телефон…</span><span class="kbd">Ctrl K</span></button>
           <div class="top-actions">
-            <button class="btn ghost hide-mob" id="tour-btn" data-tip="Сценарий на 2 минуты" data-tip-pos="bottom">${ic('play')}<span>Показать тур</span></button>
             <button class="btn" id="cheat-btn" data-tip="Условия и ответы клиенту" data-tip-pos="bottom">${ic('book-open')}<span class="hide-mob">Шпаргалка</span></button>
             <div class="rel"><button class="user-btn" id="user-btn" aria-label="Пользователь">${av(S.me)}<span class="hide-mob" id="me-name">${person(S.me).name}</span>${ic('chevron-down')}</button></div>
           </div>
@@ -177,7 +176,6 @@
     </nav>`;
     $('#search-btn').onclick = openPalette;
     $('#cheat-btn').onclick = openCheat;
-    $('#tour-btn').onclick = () => App.startTour();
     $('#user-btn').onclick = e => { e.stopPropagation(); userMenu(); };
     $('#more-btn').onclick = moreSheet;
   }
@@ -193,11 +191,16 @@
       <hr><div class="eyebrow" style="padding:6px 9px">Дизайн</div>
       ${[[1, 'Тихий рабочий'], [2, 'Тёплая бумага'], [3, 'Пульт обзвона'], [4, 'Телефон в руке']].map(([v, n]) => `<button class="mi ${(window.DIZAIN || 1) === v ? 'on' : ''}" data-dz-set="${v}">${ic('palette')}${v}. ${n}${(window.DIZAIN || 1) === v ? ic('check', 'ml') : ''}</button>`).join('')}
       <a class="mi" href="#vybor-dizaina">${ic('layout-grid')}Сравнить все четыре</a>
-      <hr><button class="mi" id="reset-demo">${ic('rotate-ccw')}Сбросить демо-данные</button>`;
+      <hr><div class="eyebrow" style="padding:6px 9px">О макете</div>
+      <button class="mi" id="tour-btn">${ic('play')}Показать тур</button>
+      <a class="mi" href="#pochemu">${ic('lightbulb')}Почему так</a>
+      <button class="mi" id="reset-demo">${ic('rotate-ccw')}Сбросить демо-данные</button>`;
     $('#user-btn').parentElement.appendChild(m); icons();
     $$('[data-me]', m).forEach(b => b.onclick = () => { S.me = b.dataset.me; save(); m.remove(); shell(); render(); toast('Вы смотрите как ' + person(S.me).name, 'user'); });
     $$('[data-theme-set]', m).forEach(b => b.onclick = () => { setTheme(b.dataset.themeSet); m.remove(); });
     $$('[data-dz-set]', m).forEach(b => b.onclick = () => App.setDizain(+b.dataset.dzSet));
+    $('#tour-btn', m).onclick = () => { m.remove(); App.startTour(); };
+    $$('a.mi', m).forEach(a => a.addEventListener('click', () => m.remove()));
     $('#reset-demo', m).onclick = () => { reset(); m.remove(); shell(); render(); toast('Демо-данные сброшены', 'rotate-ccw'); };
     setTimeout(() => document.addEventListener('click', function h(e) { if (!m.contains(e.target)) { m.remove(); document.removeEventListener('click', h); } }), 0);
   }

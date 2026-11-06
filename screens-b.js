@@ -3,6 +3,7 @@
   const A = window.App, { D, $, $$, esc, ic, av, dm, money, person, pie, pieName, co, stageBadge } = A;
 
   /* ---------- 5. Карточка компании ---------- */
+  let feedSent = false;
   A.screens.kompaniya = function (id) {
     const S = A.S, c = co(id);
     if (!c) return { html: `<div class="panel"><div class="empty" style="padding:56px 20px"><div class="ico">${ic('building-2')}</div><b>Компания не найдена</b><span>Возможно, ссылка устарела. Найдите компанию через поиск.</span><button class="btn" onclick="App.openPalette()">${ic('search')}Поиск</button></div></div>`, crumbs: ['Клиенты', 'Не найдено'] };
@@ -20,24 +21,26 @@
         <div class="row" style="gap:8px;flex-wrap:wrap">
           ${(c.dnc && c.owner !== S.me) || A.needPhone(c) ? `<button class="btn" disabled data-tip="${A.needPhone(c) ? 'Номер не тот: найдите новый' : 'Клиент в переговорах у коллеги'}">${ic('phone')}Позвонить</button>` : `<a class="btn" href="tel:${c.phone.replace(/[^\d+]/g, '')}">${ic('phone')}Позвонить</a>`}
           ${A.msgrBtns()}
-          <span class="rel"><button class="btn" id="find-phone">${ic('search')}Искать номер${ic('chevron-down')}</button></span>
-          <button class="btn" id="btn-presentation">${ic('presentation')}Отправить презентацию</button>
-          <button class="btn" id="btn-pie">${ic('croissant')}Отправить пирожок</button>
-          <button class="btn" id="btn-podborka">${ic('list-checks')}Запросить подборку</button>
-          <button class="btn primary" id="btn-contract">${ic('file-signature')}Отправить договор</button>
+          ${A.needPhone(c) || c.badPhone ? `<span class="rel"><button class="btn" id="find-phone">${ic('search')}Искать номер${ic('chevron-down')}</button></span>` : ''}
+          <span class="rel"><button class="btn primary" id="btn-send" aria-haspopup="menu">${ic('send')}Отправить${ic('chevron-down')}</button>
+            <div class="menu" id="send-menu" role="menu" hidden>
+              <button class="mi" id="btn-presentation">${ic('presentation')}Презентацию</button>
+              <button class="mi" id="btn-pie">${ic('croissant')}Пирожок</button>
+              <button class="mi" id="btn-podborka">${ic('list-checks')}Запрос подборки Павлу</button>
+              <button class="mi" id="btn-contract">${ic('file-signature')}Договор</button>
+            </div></span>
         </div>
       </div>
       <div class="facts">
         <div class="fact"><div class="l">Этап</div><div class="v">${A.stage(c.stage).name}${sinceDays != null ? `<span class="faint" style="font-weight:600">${A.days(sinceDays)}</span>` : ''}</div></div>
         <div class="fact"><div class="l">Владелец</div><div class="v">${c.owner ? av(c.owner, 'xs') + person(c.owner).name + (c.lockUntil ? `<span class="faint" style="font-weight:600">до ${dm(c.lockUntil)}</span>` : '') : '<span class="faint">Свободна</span>'}${lockedOther && !c.dnc ? '<button class="btn sm" id="ask-transfer">Попросить передать</button>' : ''}</div></div>
         <div class="fact ${A.noNext(c) ? 'hot' : ''}" id="fact-next"><div class="l">Следующий шаг</div><div class="v">${c.next ? `<span class="ell">${A.relDay(c.next.d)} ${c.next.t} · ${esc(c.next.text)}</span>` : (A.noNext(c) ? `<span>Не назначен</span>` : '<span class="faint">Не нужен</span>')}<button class="btn sm" id="set-next" style="margin-left:auto">${c.next ? 'Изменить' : 'Назначить'}</button></div></div>
-        <div class="fact"><div class="l">Касаний</div><div class="v"><span class="num">${c.history.length}</span><span class="faint" style="font-weight:600">${c.history.length ? 'последнее ' + A.relDay(c.history[0].d) : ''}</span></div></div>
       </div>
     </section>
     <div class="grid g-main">
-      <section class="panel"><div class="panel-h"><h2>${ic('history')}Лента касаний</h2><span class="meta">видят все менеджеры</span></div>
+      <section class="panel" id="feed-panel"><div class="panel-h"><h2>${ic('history')}Лента касаний</h2><span class="meta"><span class="seg" role="tablist"><button class="${feedSent ? '' : 'on'}" data-fs="0">Все <span class="num">${c.history.length}</span></button><button class="${feedSent ? 'on' : ''}" data-fs="1" id="feed-sent">Что отправлено <span class="num">${sent.length}</span></button></span></span></div>
         <div class="panel-b"><div class="row" style="margin-bottom:6px;flex-wrap:wrap"><button class="btn" id="paste-chat" style="flex:none">${ic('clipboard-paste')}Вставить из переписки</button></div><div class="row" style="margin-bottom:6px"><input class="input" id="note-in" placeholder="Заметка: что сказал клиент, о чём договорились"><button class="btn" id="note-add">${ic('plus')}<span class="hide-mob">Добавить</span></button></div>
-          ${c.history.length ? A.feed(c.history) : `<div class="empty"><div class="ico">${ic('history')}</div><b>Касаний ещё не было</b><span>Звонки, письма и отправленные пирожки появятся здесь.</span></div>`}</div></section>
+          ${(feedSent ? sent : c.history).length ? A.feed(feedSent ? sent : c.history) : feedSent ? `<div class="empty"><div class="ico">${ic('send')}</div><b>Ничего не отправляли</b><span>Пирожки, подборки, договоры и презентации появятся здесь с датой и автором.</span></div>` : `<div class="empty"><div class="ico">${ic('history')}</div><b>Касаний ещё не было</b><span>Звонки, письма и отправленные пирожки появятся здесь.</span></div>`}</div></section>
       <div class="stack" style="gap:16px">
         <section class="panel" id="q-panel"><div class="panel-h"><h2>${ic('circle-help')}Вопросы специалисту</h2><span class="meta">${av('pavel', 'xs')}Павел</span></div>
           <div class="panel-b stack" style="gap:10px">
@@ -50,19 +53,22 @@
         <section class="panel"><div class="panel-h"><h2>${ic('clipboard-list')}Профиль для подборки</h2><span class="meta"><button class="btn sm ghost" id="prof-edit">${ic('pencil')}Изменить</button></span></div>
           <div class="panel-b">${c.profile ? `<dl class="kv"><dt>Регионы</dt><dd>${c.profile.regions.map(r => `<span class="tag">${esc(r)}</span>`).join('')}</dd><dt>Виды работ</dt><dd>${c.profile.works.map(r => `<span class="tag">${esc(r)}</span>`).join('')}</dd><dt>Лицензии</dt><dd>${c.profile.licenses.map(r => `<span class="tag">${esc(r)}</span>`).join('')}</dd><dt>Сумма от</dt><dd>${c.profile.min}</dd><dt>Аванс</dt><dd>${c.profile.advance}</dd></dl>`
             : `<div class="empty" style="padding:14px"><b>Профиль не уточнён</b><span>Регионы, виды работ и допуски нужны Павлу для подборки.</span><button class="btn sm" id="prof-fill">Заполнить</button></div>`}</div></section>
-        <section class="panel"><div class="panel-h"><h2>${ic('send')}Что отправлено</h2><span class="meta num">${sent.length}</span></div>
-          <div class="panel-b">${sent.length ? `<div class="sent-list">${sent.map(h => `<div class="sent">${ic(h.out === 'pie' ? 'croissant' : h.out === 'pod' ? 'list-checks' : h.out === 'material' ? 'paperclip' : 'file-signature')}<span class="ell" style="flex:1">${esc(h.text)}${h.pie ? ': ' + pieName(pie(h.pie)) : ''}</span>${av(h.who, 'xs')}<span class="faint mono" style="font-size:12px">${dm(h.d)}</span></div>`).join('')}</div>`
-            : `<div class="empty" style="padding:14px"><b>Ничего не отправляли</b><span>Пирожки, подборки и договоры появятся здесь с датой и автором.</span></div>`}</div></section>
       </div>
     </div>`;
     return {
       crumbs: ['<a href="#klienty">Клиенты</a>', esc(c.name)], html, mount: v => {
+        const sm = $('#send-menu', v);
+        $('#btn-send', v).onclick = e => {
+          e.stopPropagation(); sm.hidden = !sm.hidden;
+          if (!sm.hidden) setTimeout(() => document.addEventListener('click', function h() { sm.hidden = true; document.removeEventListener('click', h); }), 0);
+        };
+        $$('[data-fs]', v).forEach(b => b.onclick = () => { feedSent = b.dataset.fs === '1'; A.render({ keepScroll: true }); });
         $('#btn-pie', v).onclick = () => sendPieModal(c);
         $('#btn-podborka', v).onclick = () => podborkaModal(c);
         $('#btn-contract', v).onclick = () => A.contractModal(c);
         $('#btn-presentation', v).onclick = () => A.materialModal(c, 'presentation');
         $('#paste-chat', v).onclick = () => A.pasteModal(c);
-        $('#find-phone', v).onclick = e => { e.stopPropagation(); A.searchMenu(c, e.currentTarget); };
+        const fp = $('#find-phone', v); if (fp) fp.onclick = e => { e.stopPropagation(); A.searchMenu(c, e.currentTarget); };
         $('#turnover', v).onchange = e => { c.turnover = +e.target.value || 0; A.save(); A.render({ keepScroll: true }); };
         const nps = $('#np-save', v); if (nps) nps.onclick = () => { const x = $('#np-in', v).value.trim(); if (!x) { A.toast('Впишите новый номер', 'info'); return; } c.phone = x; A.addHist(c, { type: 'call', out: 'note', text: 'Найден новый номер: ' + x }); A.save(); A.render(); A.toast('Новый номер сохранён', 'phone'); };
         $('#set-next', v).onclick = () => nextStepModal(c);
@@ -156,7 +162,9 @@
 
   /* ---------- 6. Клиенты (канбан) ---------- */
   let kbOwner = 'all', kbNoStep = false, kbQ = '';
-  const COLS = ['interest', 'pie_sent', 'profile', 'wait_pod', 'pod_sent', 'contract_sent', 'signed', 'accred', 'participation', 'result'];
+  const AFTER = ['signed', 'accred', 'participation', 'result'];
+  const COLS = ['interest', 'pie_sent', 'profile', 'wait_pod', 'pod_sent', 'contract_sent', ...AFTER];
+  const BOARD = ['interest', 'pie_sent', 'profile', 'wait_pod', 'pod_sent', 'contract_sent', 'after'];
   A.screens.klienty = function () {
     const S = A.S;
     let list = S.cos.filter(c => COLS.includes(c.stage));
@@ -168,17 +176,17 @@
       return `<a class="kc ${c.dnc ? 'dnc' : ''}" draggable="true" data-id="${c.id}" href="#kompaniya-${c.id}">
         <div class="row" style="align-items:flex-start"><span class="nm" style="flex:1;min-width:0">${esc(c.name.replace(/^ООО /, ''))}</span>${av(c.owner, 'xs')}</div>
         <div class="ln">${ic('map-pin')}<span class="ell">${c.city}</span><span style="margin-left:auto" class="num ${d > 5 ? '' : 'faint'}" data-tip="Дней на этапе">${d} дн</span></div>
+        ${AFTER.includes(c.stage) ? `<span class="faint" style="font-size:12px">${A.stage(c.stage).name}</span>` : ''}
         ${c.dnc ? '<span class="badge dnc" style="align-self:flex-start">Не звонить</span>' : ''}${c.won ? '<span class="badge win" style="align-self:flex-start">Победа</span>' : ''}
         <div class="next ${c.next ? '' : (A.noNext(c) ? 'none' : '')}">${c.next ? `${ic('calendar-check')}<span class="ell">${A.relDay(c.next.d)} ${c.next.t} · ${esc(c.next.text)}</span>` : (A.noNext(c) ? `${ic('triangle-alert')}Нет следующего шага` : `<span class="faint">Сделка закрыта</span>`)}</div></a>`;
     };
     const html = `
     <div class="page-head"><div><h1>Клиенты</h1><div class="sub">${list.length} в работе. Перетащите карточку, чтобы сменить этап. Без следующего шага карточка краснеет.</div></div>
-      <div class="actions"><input class="input" id="kb-q" placeholder="Поиск по названию, городу, ИНН" value="${esc(kbQ)}" style="width:250px;max-width:100%"><button class="btn ${kbNoStep ? 'primary' : ''}" id="kb-ns">${ic('triangle-alert')}Без шага</button></div></div>
-    <div class="chips" style="margin-bottom:14px"><button class="chip ${kbOwner === 'all' ? 'on' : ''}" data-ow="all">Все менеджеры</button>${D.MANAGERS.map(m => `<button class="chip ${kbOwner === m.id ? 'on' : ''}" data-ow="${m.id}" style="display:inline-flex;align-items:center;gap:6px;padding-left:4px">${av(m.id, 'xs')}${m.name}</button>`).join('')}</div>
-    <div class="board" id="board">${COLS.map(s => { const items = list.filter(c => c.stage === s); const st = A.stage(s); return `<div class="col" data-col="${s}"><div class="col-h"><span class="badge stage" style="--sc:var(--st-${st.c});padding:0;border:0;background:none;height:auto"><span class="dot"></span></span>${st.name}<span class="n">${items.length}</span></div><div class="col-b">${items.length ? items.map(card).join('') : '<div class="col-empty">Пусто. Перетащите сюда</div>'}</div></div>`; }).join('')}</div>`;
+      <div class="actions"><input class="input" id="kb-q" placeholder="Поиск по названию, городу, ИНН" value="${esc(kbQ)}" style="width:250px;max-width:100%"><select class="input" id="kb-ow" aria-label="Менеджер" style="width:auto"><option value="all">Все менеджеры</option>${D.MANAGERS.map(m => `<option value="${m.id}" ${kbOwner === m.id ? 'selected' : ''}>${m.name}</option>`).join('')}</select><button class="btn ${kbNoStep ? 'primary' : ''}" id="kb-ns">${ic('triangle-alert')}Без шага</button></div></div>
+    <div class="board" id="board">${BOARD.map(s => { const items = list.filter(c => s === 'after' ? AFTER.includes(c.stage) : c.stage === s); const st = s === 'after' ? { name: 'После подписания', c: A.stage('signed').c } : A.stage(s); return `<div class="col" data-col="${s}"><div class="col-h"><span class="badge stage" style="--sc:var(--st-${st.c});padding:0;border:0;background:none;height:auto"><span class="dot"></span></span>${st.name}<span class="n">${items.length}</span></div><div class="col-b">${items.length ? items.map(card).join('') : '<div class="col-empty">Пусто. Перетащите сюда</div>'}</div></div>`; }).join('')}</div>`;
     return {
       html, mount: v => {
-        $$('[data-ow]', v).forEach(b => b.onclick = () => { kbOwner = b.dataset.ow; A.render(); });
+        $('#kb-ow', v).onchange = e => { kbOwner = e.target.value; A.render(); };
         $('#kb-ns', v).onclick = () => { kbNoStep = !kbNoStep; A.render(); };
         const q = $('#kb-q', v); q.oninput = () => { kbQ = q.value; clearTimeout(q._t); q._t = setTimeout(() => { A.render(); const n = $('#kb-q'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); };
         let dragId = null;
@@ -191,7 +199,8 @@
           col.addEventListener('dragleave', e => { if (!col.contains(e.relatedTarget)) col.classList.remove('over'); });
           col.addEventListener('drop', e => {
             e.preventDefault(); col.classList.remove('over');
-            const c = co(dragId || e.dataTransfer.getData('text/plain')); const s = col.dataset.col;
+            const c = co(dragId || e.dataTransfer.getData('text/plain')); let s = col.dataset.col;
+            if (s === 'after') { if (c && AFTER.includes(c.stage)) return; s = 'signed'; }
             if (!c || c.stage === s) return;
             c.stage = s; c.since = A.TODAY; A.addHist(c, { type: 'stage', out: 'stage', text: 'Этап: ' + A.stage(s).name });
             if (s === 'contract_sent' && !c.dnc) c.dnc = `Договор отправлен ${dm(A.TODAY)}, владелец: ${person(c.owner).name}. С других пирожков не звонить.`;
@@ -222,12 +231,7 @@
         <div class="act-col row" style="justify-content:flex-end;gap:6px"><span class="st-col">${st}</span>${p.status === 'new' ? `<button class="btn sm" data-collect="${p.id}">Беру</button>` : p.status === 'collecting' ? `<button class="btn sm primary" data-send="${p.id}">Отправлена</button>` : ''}</div></div>`;
     };
     const html = `
-    <div class="page-head"><div><h1>Подборки</h1><div class="sub">Очередь Павла: все запросы менеджеров в одном месте, с профилем клиента и временем ожидания</div></div></div>
-    <div class="panel kpis k3">
-      <div class="kpi"><div class="lbl">${ic('inbox')}В очереди</div><div class="val">${queue.length}</div><div class="delta">новых ${queue.filter(p => p.status === 'new').length}, в сборке ${queue.filter(p => p.status === 'collecting').length}</div></div>
-      <div class="kpi"><div class="lbl">${ic('clock')}Среднее ожидание</div><div class="val">${avgH >= 24 ? Math.floor(avgH / 24) + ' д ' + avgH % 24 + ' ч' : avgH + ' ч'}</div><div class="delta">цель: меньше 1 дня</div></div>
-      <div class="kpi"><div class="lbl">${ic('hourglass')}Дольше всех</div><div class="val" style="${oldest && A.ageOf(oldest.at).hot ? 'color:var(--hot)' : ''}">${oldest ? A.ageOf(oldest.at).txt : '—'}</div><div class="delta ell">${oldest ? esc(co(oldest.co).name) : 'очередь пуста'}</div></div>
-    </div>
+    <div class="page-head"><div><h1>Подборки</h1><div class="sub">Очередь Павла: все запросы менеджеров в одном месте${queue.length ? ` · среднее ожидание ${avgH >= 24 ? Math.floor(avgH / 24) + ' д ' + avgH % 24 + ' ч' : avgH + ' ч'}, цель меньше 1 дня` : ''}</div></div></div>
     <section class="panel"><div class="panel-h" style="flex-wrap:wrap"><span class="seg">${[['queue', 'В очереди', queue.length], ['new', 'Новые', queue.filter(p => p.status === 'new').length], ['collecting', 'Собираю', queue.filter(p => p.status === 'collecting').length], ['sent', 'Отправленные', sent.length]].map(([k, n, x]) => `<button class="${podTab === k ? 'on' : ''}" data-pt="${k}">${n} <span class="faint num">${x}</span></button>`).join('')}</span></div>
       ${list.length ? `<div class="req req-h hide-mob"><span>Клиент</span><span>Профиль</span><span class="who-col">Кто просил</span><span>${podTab === 'sent' ? 'Отправлена' : 'Ждёт'}</span><span style="text-align:right">Статус</span></div>${list.map(row).join('')}`
         : `<div class="empty"><div class="ico">${ic('check-check')}</div><b>${podTab === 'sent' ? 'Пока ничего не отправлено' : 'Здесь пусто'}</b><span>${podTab === 'sent' ? 'Отправленные подборки появятся здесь.' : 'Все запросы разобраны.'}</span></div>`}
@@ -374,28 +378,44 @@
     ['НМЦК', 'начальная (максимальная) цена контракта: от неё идут торги.'],
     ['Обеспечение заявки', 'деньги, которые участник блокирует на время торгов; после торгов возвращаются.'],
   ];
+  const CT = [['cond', 'Условия'], ['faq', 'Вопросы'], ['gloss', 'Словарь'], ['mat', 'Материалы']];
+  A.cheatTab = function (b) {
+    const root = b.closest('.drawer-b, #view') || document;
+    root.querySelectorAll('[data-ct]').forEach(x => x.classList.toggle('on', x === b));
+    root.querySelectorAll('[data-pane]').forEach(x => { x.hidden = x.dataset.pane !== b.dataset.ct; });
+  };
   A.cheatBody = function (compact) {
     return `<div class="say"><div class="eyebrow" style="color:var(--accent-text)">Первый звонок: говорим только это</div><div class="q">«Работаем за 2 % после победы»</div><p class="muted" style="margin-top:6px;font-size:12.5px">Тарифы и пакеты обсуждаем, только когда клиент заинтересовался и спросил.</p></div>
+
+      <span class="seg cheat-tabs" role="tablist">${CT.map(([k, n], i) => `<button class="${i ? '' : 'on'}" data-ct="${k}" onclick="App.cheatTab(this)">${n}</button>`).join('')}</span>
+      <div class="ct-pane" data-pane="cond">
       <section class="panel"><div class="panel-h"><h3>${ic('receipt')}Условия</h3></div>
         <div class="price-row"><div><b>Участие в одной закупке</b><div class="d">засчитывается в вознаграждение при победе</div></div><span class="v">16 000 ₽</span></div>
         <div class="price-row"><div><b>Пакет 7 закупок</b><div class="d">по 12 000 ₽ за закупку</div></div><span class="v">84 000 ₽</span></div>
         <div class="price-row"><div><b>Пакет 15 закупок</b><div class="d">по 7 000 ₽ за закупку</div></div><span class="v">105 000 ₽</span></div>
         <div class="price-row"><div><b>При победе</b><div class="d">от суммы контракта</div></div><span class="v">2 %</span></div>
         <div class="price-row" style="background:var(--surface-2)"><div><b>Когда платят</b><div class="d">после итогового протокола. Это не аванс</div></div><span class="v">${ic('check')}</span></div></section>
+      </div>
+      <div class="ct-pane stack" data-pane="faq" style="gap:16px" hidden>
+      <div class="warn-line" style="margin:0">${ic('circle-help')}<span><b>Не знаете ответа?</b> Скажите «уточню и перезвоню», откройте карточку клиента и задайте вопрос Павлу в блоке «Вопросы специалисту». Не пишите в общий чат: там вопрос потеряется.</span></div>
+      <section class="panel"><div class="panel-h"><h3>${ic('messages-square')}Частые вопросы</h3><span class="meta num">${FAQ.length}</span></div>
+        ${FAQ.map(([q, a], i) => `<details class="faq" ${!compact && i < 2 ? 'open' : ''}><summary>${esc(q)}${ic('chevron-down')}</summary><div class="ans">${a}</div></details>`).join('')}</section>
+      </div>
+      <div class="ct-pane" data-pane="gloss" hidden>
+      <section class="panel" id="glossary"><div class="panel-h"><h3>${ic('book-a')}Словарь</h3><span class="meta num">${GLOSS.length}</span></div>
+        ${GLOSS.map(([t, d]) => `<div class="price-row gl-row"><div><b>${t}</b><div class="d">${d}</div></div></div>`).join('')}</section>
+      </div>
+      <div class="ct-pane" data-pane="mat" hidden>
       <section class="panel" id="materials"><div class="panel-h"><h3>${ic('paperclip')}Материалы</h3></div>
         <div class="price-row"><div><b>Презентация</b><div class="d"><span class="badge acc">проверено на телефоне</span> открывается без приложений</div></div><button class="btn sm" data-mat="Презентация">${ic('eye')}Открыть</button></div>
         <div class="price-row"><div><b>Условия</b><div class="d">тарифы и порядок оплаты одной страницей</div></div><button class="btn sm" data-mat="Условия">${ic('eye')}Открыть</button></div>
         <div class="price-row"><div><b>Пример подборки</b><div class="d">как выглядит список закупок для клиента</div></div><button class="btn sm" data-mat="Пример подборки">${ic('eye')}Открыть</button></div></section>
-      <div class="warn-line" style="margin:0">${ic('circle-help')}<span><b>Не знаете ответа?</b> Скажите «уточню и перезвоню», откройте карточку клиента и задайте вопрос Павлу в блоке «Вопросы специалисту». Не пишите в общий чат: там вопрос потеряется.</span></div>
-      <section class="panel"><div class="panel-h"><h3>${ic('messages-square')}Частые вопросы</h3><span class="meta num">${FAQ.length}</span></div>
-        ${FAQ.map(([q, a], i) => `<details class="faq" ${!compact && i < 2 ? 'open' : ''}><summary>${esc(q)}${ic('chevron-down')}</summary><div class="ans">${a}</div></details>`).join('')}</section>
-      <section class="panel" id="glossary"><div class="panel-h"><h3>${ic('book-a')}Словарь</h3><span class="meta num">${GLOSS.length}</span></div>
-        ${GLOSS.map(([t, d]) => `<div class="price-row gl-row"><div><b>${t}</b><div class="d">${d}</div></div></div>`).join('')}</section>`;
+      </div>`;
   };
   A.screens.shpargalka = function () {
     return {
       html: `<div class="page-head"><div><h1>Шпаргалка</h1><div class="sub">Условия простыми словами и ответы на частые вопросы. Открывается с любого экрана кнопкой «Шпаргалка» сверху.</div></div></div>
-      <div class="cheat-grid">${(() => { const b = A.cheatBody(false); const i = b.indexOf('<section class="panel"><div class="panel-h"><h3>' + ic('messages-square')); return `<div class="stack" style="gap:16px">${b.slice(0, i)}</div><div>${b.slice(i)}</div>`; })()}</div>`,
+      <div class="cheat-one stack" style="gap:16px">${A.cheatBody(false)}</div>`,
     };
   };
 

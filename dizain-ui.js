@@ -11,7 +11,7 @@
   ];
 
   /* ---------- меню и маршрут ---------- */
-  A.ROUTES.push({ id: 'vybor-dizaina', name: 'Выбрать дизайн', icon: 'palette', group: 'О макете' });
+  A.ROUTES.push({ id: 'vybor-dizaina', name: 'Выбрать дизайн', icon: 'palette', group: 'О макете', hidden: true });
   A.setDizain = function (n) {
     try { localStorage.setItem('st-dizain', String(n)); } catch (e) { }
     const u = new URL(location.href); u.searchParams.set('dizain', n); u.searchParams.delete('tur');
@@ -46,13 +46,7 @@
     };
   };
 
-  /* ---------- плашка на главной ---------- */
-  const origPl = A.screens.planerka;
-  A.screens.planerka = function () {
-    const r = origPl.apply(this, arguments);
-    r.html = `<a class="dz-banner" id="dz-banner" href="#vybor-dizaina">${ic('palette')}<span><b>Выбрать дизайн.</b> Четыре варианта на одних данных: сейчас открыт «${VARIANTS[N - 1].name}».</span>${ic('arrow-right')}</a>` + r.html;
-    return r;
-  };
+  /* плашку «Выбрать дизайн» на главной убрали 06.11 (упрощение): выбор в меню пользователя */
 
   /* ---------- вариант 3: таймер звонка (только вид) ---------- */
   if (N === 3) {
